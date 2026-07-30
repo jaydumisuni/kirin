@@ -186,4 +186,3 @@ IMEI 1 / IMEI 2
 SIM slot test
 Wi-Fi and camera test
 ```
-
