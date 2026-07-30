@@ -3,6 +3,15 @@
 Xray is the project notebook for Kirin recovery work. Each entry should separate
 observed evidence from assumptions and unverified next steps.
 
+The executable read-only collector is documented in
+[`collector.md`](collector.md). Its raw JSON output preserves unsupported,
+undefined, rejected, and concrete values as different states.
+
+The sanitized local service-tool observations are documented in
+[`unlocktool-static-kirin980-observations-2026-07-31.md`](unlocktool-static-kirin980-observations-2026-07-31.md).
+They record test-point, patched-fastboot, and OEMINFO workflow evidence without
+copying proprietary payloads or raw identifiers.
+
 ## Entry format
 
 Use one Markdown file per recovery or conversion case.

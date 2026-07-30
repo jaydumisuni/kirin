@@ -1,0 +1,3124 @@
+{
+  "schema_version": 1,
+  "capture": {
+    "started_at": "2026-07-30T21:59:02+00:00",
+    "finished_at": "2026-07-30T21:59:15+00:00",
+    "host": {
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.10.9",
+      "machine": "AMD64"
+    }
+  },
+  "safety": {
+    "mode": "read_only",
+    "statement": "Xray did not request flash, erase, reboot, boot, unlock, relock, format, continue, or partition fetch operations."
+  },
+  "tools": {
+    "adb": {
+      "path": "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\adb.exe",
+      "version": {
+        "command": [
+          "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\adb.exe",
+          "version"
+        ],
+        "returncode": 0,
+        "stdout": "Android Debug Bridge version 1.0.41\nVersion 37.0.0-14910828\nInstalled as D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\adb.exe\nRunning on Windows 10.0.26200",
+        "status": "ok",
+        "elapsed_ms": 48,
+        "error": null
+      }
+    },
+    "fastboot": {
+      "path": "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+      "version": {
+        "command": [
+          "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "fastboot version 37.0.0-14910828\nInstalled as D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+        "status": "ok",
+        "elapsed_ms": 24,
+        "error": null
+      }
+    }
+  },
+  "windows_usb": {
+    "serial_ports": [],
+    "entities": [
+      {
+        "Name": "Android Bootloader Interface",
+        "Manufacturer": "LeMobile",
+        "Status": "OK",
+        "PNPClass": "AndroidUsbDeviceClass",
+        "Service": "WinUSB",
+        "DeviceID": "USB\\VID_18D1&PID_D00D\\5&242A2F40&0&1",
+        "HardwareID": [
+          "USB\\VID_18D1&PID_D00D&REV_0100",
+          "USB\\VID_18D1&PID_D00D"
+        ],
+        "CompatibleID": [
+          "USB\\COMPAT_VID_18D1&Class_FF&SubClass_42&Prot_03",
+          "USB\\COMPAT_VID_18D1&Class_FF&SubClass_42",
+          "USB\\COMPAT_VID_18D1&Class_FF",
+          "USB\\Class_FF&SubClass_42&Prot_03",
+          "USB\\Class_FF&SubClass_42",
+          "USB\\Class_FF"
+        ]
+      },
+      {
+        "Name": "USB Composite Device",
+        "Manufacturer": "(Standard USB Host Controller)",
+        "Status": "OK",
+        "PNPClass": "USB",
+        "Service": "usbccgp",
+        "DeviceID": "USB\\VID_2B7E&PID_B685\\5&242A2F40&0&7",
+        "HardwareID": [
+          "USB\\VID_2B7E&PID_B685&REV_0001",
+          "USB\\VID_2B7E&PID_B685"
+        ],
+        "CompatibleID": [
+          "USB\\COMPAT_VID_2B7E&DevClass_00&SubClass_00&Prot00",
+          "USB\\COMPAT_VID_2B7E&DevClass_00&SubClass_00",
+          "USB\\COMPAT_VID_2B7E&DevClass_00",
+          "USB\\DevClass_00&SubClass_00&Prot_00",
+          "USB\\DevClass_00&SubClass_00",
+          "USB\\DevClass_00",
+          "USB\\COMPOSITE"
+        ]
+      }
+    ],
+    "drivers": [
+      {
+        "DeviceName": "Android Bootloader Interface",
+        "Manufacturer": "LeMobile",
+        "DriverProviderName": "LeMobile",
+        "DriverVersion": "11.0.0.0",
+        "DriverDate": "/Date(1472342400000)/",
+        "InfName": "oem460.inf",
+        "IsSigned": true,
+        "Signer": "Microsoft Windows Hardware Compatibility Publisher",
+        "DeviceID": "USB\\VID_18D1&PID_D00D\\5&242A2F40&0&1"
+      },
+      {
+        "DeviceName": "USB Composite Device",
+        "Manufacturer": "(Standard USB Host Controller)",
+        "DriverProviderName": "Microsoft",
+        "DriverVersion": "10.0.26100.8521",
+        "DriverDate": "/Date(1150848000000)/",
+        "InfName": "usb.inf",
+        "IsSigned": true,
+        "Signer": "Microsoft Windows",
+        "DeviceID": "USB\\VID_2B7E&PID_B685\\5&242A2F40&0&7"
+      }
+    ],
+    "status": "ok",
+    "note": "Manufacturer and provider names in this section describe Windows drivers or USB descriptors; they are not trusted phone identity."
+  },
+  "adb": {
+    "listing": {
+      "command": [
+        "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\adb.exe",
+        "devices",
+        "-l"
+      ],
+      "returncode": 0,
+      "stdout": "List of devices attached",
+      "status": "ok",
+      "elapsed_ms": 48,
+      "error": null
+    },
+    "devices": [],
+    "probes": {},
+    "status": "probed"
+  },
+  "fastboot": {
+    "listing": {
+      "command": [
+        "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+        "devices",
+        "-l"
+      ],
+      "returncode": 0,
+      "stdout": "5T5PUB194L059785       fastboot",
+      "status": "ok",
+      "elapsed_ms": 56,
+      "error": null
+    },
+    "devices": [
+      {
+        "serial": "5T5PUB194L059785",
+        "state": "fastboot"
+      }
+    ],
+    "probes": {
+      "5T5PUB194L059785": {
+        "variables": {
+          "all": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "product": {
+            "status": "value",
+            "value": "kirin980",
+            "error": null
+          },
+          "product-name": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "device": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "device-codename": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "model": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "sku": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "variant": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "hw-revision": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "serialno": {
+            "status": "value",
+            "value": "serialv1.0",
+            "error": null
+          },
+          "version": {
+            "status": "value",
+            "value": "0.5",
+            "error": null
+          },
+          "version-bootloader": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "version-baseband": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "version-os": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "version-vndk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "os-version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "android-version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "security-patch-level": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "build-number": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "build-version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "current-slot": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "slot-count": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "slot-suffixes": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "is-userspace": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "secure": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "unlocked": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "lock-state": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "device-state": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "frp": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "frp-state": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "anti": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "anti-rollback": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "rollback-index": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "battery-voltage": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "battery-soc-ok": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "off-mode-charge": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "charger-screen-enabled": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "max-download-size": {
+            "status": "value",
+            "value": "471859200",
+            "error": null
+          },
+          "logical-block-size": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "erase-block-size": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "page-size": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "rescue_phoneinfo": {
+            "status": "value",
+            "value": "NO MAIN VERSION",
+            "error": null
+          },
+          "vendorcountry": {
+            "status": "error",
+            "value": null,
+            "error": "getvar:vendorcountry                               FAILED (remote: 'cannot get vendorcountry in oeminfo')"
+          },
+          "boot-mode": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "crc": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "dp-level": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "unlock-token": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "parallel-download": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "cpu-id": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "flash-id": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "ram-size": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "internal-memory-size": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "imei": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "imei1": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "imei2": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:oeminfo": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:oeminfo": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:oeminfo": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:version": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:preload": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:preload": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:preload": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:super": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:super": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:super": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta_system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta_system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta_system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta_vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta_vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta_vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta_odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta_odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta_odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta_hw_product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta_hw_product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta_hw_product": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vbmeta_cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vbmeta_cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vbmeta_cust": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:system": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:vendor": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:odm": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:boot": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:boot": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:boot": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:recovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:recovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:recovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:erecovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:erecovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:erecovery_ramdisk": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-type:userdata": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "partition-size:userdata": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          },
+          "has-slot:userdata": {
+            "status": "undefined",
+            "value": "undefine",
+            "error": null
+          }
+        },
+        "commands": {
+          "getvar all": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "all"
+            ],
+            "returncode": 0,
+            "stdout": "all: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 22,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "product"
+            ],
+            "returncode": 0,
+            "stdout": "product: kirin980\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "value",
+              "value": "kirin980",
+              "error": null
+            }
+          },
+          "getvar product-name": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "product-name"
+            ],
+            "returncode": 0,
+            "stdout": "product-name: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar device": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "device"
+            ],
+            "returncode": 0,
+            "stdout": "device: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar device-codename": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "device-codename"
+            ],
+            "returncode": 0,
+            "stdout": "device-codename: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 36,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar model": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "model"
+            ],
+            "returncode": 0,
+            "stdout": "model: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 45,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar sku": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "sku"
+            ],
+            "returncode": 0,
+            "stdout": "sku: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 39,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar variant": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "variant"
+            ],
+            "returncode": 0,
+            "stdout": "variant: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 83,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar hw-revision": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "hw-revision"
+            ],
+            "returncode": 0,
+            "stdout": "hw-revision: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar serialno": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "serialno"
+            ],
+            "returncode": 0,
+            "stdout": "serialno: serialv1.0\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "value",
+              "value": "serialv1.0",
+              "error": null
+            }
+          },
+          "getvar version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "version"
+            ],
+            "returncode": 0,
+            "stdout": "version: 0.5\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "value",
+              "value": "0.5",
+              "error": null
+            }
+          },
+          "getvar version-bootloader": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "version-bootloader"
+            ],
+            "returncode": 0,
+            "stdout": "version-bootloader: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 55,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar version-baseband": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "version-baseband"
+            ],
+            "returncode": 0,
+            "stdout": "version-baseband: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 61,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar version-os": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "version-os"
+            ],
+            "returncode": 0,
+            "stdout": "version-os: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 51,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar version-vndk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "version-vndk"
+            ],
+            "returncode": 0,
+            "stdout": "version-vndk: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 33,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar os-version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "os-version"
+            ],
+            "returncode": 0,
+            "stdout": "os-version: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar android-version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "android-version"
+            ],
+            "returncode": 0,
+            "stdout": "android-version: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar security-patch-level": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "security-patch-level"
+            ],
+            "returncode": 0,
+            "stdout": "security-patch-level: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar build-number": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "build-number"
+            ],
+            "returncode": 0,
+            "stdout": "build-number: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar build-version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "build-version"
+            ],
+            "returncode": 0,
+            "stdout": "build-version: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar current-slot": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "current-slot"
+            ],
+            "returncode": 0,
+            "stdout": "current-slot: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 31,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar slot-count": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "slot-count"
+            ],
+            "returncode": 0,
+            "stdout": "slot-count: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 46,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar slot-suffixes": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "slot-suffixes"
+            ],
+            "returncode": 0,
+            "stdout": "slot-suffixes: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 38,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar is-userspace": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "is-userspace"
+            ],
+            "returncode": 0,
+            "stdout": "is-userspace: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar secure": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "secure"
+            ],
+            "returncode": 0,
+            "stdout": "secure: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 33,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar unlocked": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "unlocked"
+            ],
+            "returncode": 0,
+            "stdout": "unlocked: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 41,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar lock-state": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "lock-state"
+            ],
+            "returncode": 0,
+            "stdout": "lock-state: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 34,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar device-state": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "device-state"
+            ],
+            "returncode": 0,
+            "stdout": "device-state: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 53,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar frp": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "frp"
+            ],
+            "returncode": 0,
+            "stdout": "frp: undefine\nFinished. Total time: 0.000s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar frp-state": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "frp-state"
+            ],
+            "returncode": 0,
+            "stdout": "frp-state: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 39,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar anti": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "anti"
+            ],
+            "returncode": 0,
+            "stdout": "anti: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 35,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar anti-rollback": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "anti-rollback"
+            ],
+            "returncode": 0,
+            "stdout": "anti-rollback: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 37,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar rollback-index": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "rollback-index"
+            ],
+            "returncode": 0,
+            "stdout": "rollback-index: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 41,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar battery-voltage": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "battery-voltage"
+            ],
+            "returncode": 0,
+            "stdout": "battery-voltage: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 39,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar battery-soc-ok": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "battery-soc-ok"
+            ],
+            "returncode": 0,
+            "stdout": "battery-soc-ok: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 42,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar off-mode-charge": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "off-mode-charge"
+            ],
+            "returncode": 0,
+            "stdout": "off-mode-charge: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 42,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar charger-screen-enabled": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "charger-screen-enabled"
+            ],
+            "returncode": 0,
+            "stdout": "charger-screen-enabled: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar max-download-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "max-download-size"
+            ],
+            "returncode": 0,
+            "stdout": "max-download-size: 471859200\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 36,
+            "error": null,
+            "parsed": {
+              "status": "value",
+              "value": "471859200",
+              "error": null
+            }
+          },
+          "getvar logical-block-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "logical-block-size"
+            ],
+            "returncode": 0,
+            "stdout": "logical-block-size: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 34,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar erase-block-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "erase-block-size"
+            ],
+            "returncode": 0,
+            "stdout": "erase-block-size: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar page-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "page-size"
+            ],
+            "returncode": 0,
+            "stdout": "page-size: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar rescue_phoneinfo": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "rescue_phoneinfo"
+            ],
+            "returncode": 0,
+            "stdout": "(bootloader) main version do not exist in oeminfo!\n\nrescue_phoneinfo: NO MAIN VERSION\nFinished. Total time: 0.010s",
+            "status": "ok",
+            "elapsed_ms": 59,
+            "error": null,
+            "parsed": {
+              "status": "value",
+              "value": "NO MAIN VERSION",
+              "error": null
+            }
+          },
+          "getvar vendorcountry": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "vendorcountry"
+            ],
+            "returncode": 0,
+            "stdout": "getvar:vendorcountry                               FAILED (remote: 'cannot get vendorcountry in oeminfo')\nFinished. Total time: 0.014s",
+            "status": "ok",
+            "elapsed_ms": 66,
+            "error": null,
+            "parsed": {
+              "status": "error",
+              "value": null,
+              "error": "getvar:vendorcountry                               FAILED (remote: 'cannot get vendorcountry in oeminfo')"
+            }
+          },
+          "getvar boot-mode": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "boot-mode"
+            ],
+            "returncode": 0,
+            "stdout": "boot-mode: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 52,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar crc": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "crc"
+            ],
+            "returncode": 0,
+            "stdout": "crc: undefine\nFinished. Total time: 0.000s",
+            "status": "ok",
+            "elapsed_ms": 39,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar dp-level": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "dp-level"
+            ],
+            "returncode": 0,
+            "stdout": "dp-level: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 34,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar unlock-token": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "unlock-token"
+            ],
+            "returncode": 0,
+            "stdout": "unlock-token: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar parallel-download": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "parallel-download"
+            ],
+            "returncode": 0,
+            "stdout": "parallel-download: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar cpu-id": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "cpu-id"
+            ],
+            "returncode": 0,
+            "stdout": "cpu-id: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar flash-id": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "flash-id"
+            ],
+            "returncode": 0,
+            "stdout": "flash-id: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar ram-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "ram-size"
+            ],
+            "returncode": 0,
+            "stdout": "ram-size: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 49,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar internal-memory-size": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "internal-memory-size"
+            ],
+            "returncode": 0,
+            "stdout": "internal-memory-size: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar imei": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "imei"
+            ],
+            "returncode": 0,
+            "stdout": "imei: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar imei1": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "imei1"
+            ],
+            "returncode": 0,
+            "stdout": "imei1: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar imei2": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "imei2"
+            ],
+            "returncode": 0,
+            "stdout": "imei2: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:oeminfo": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:oeminfo"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:oeminfo: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:oeminfo": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:oeminfo"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:oeminfo: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 38,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:oeminfo": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:oeminfo"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:oeminfo: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:version"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:version: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:version"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:version: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:version": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:version"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:version: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:cust"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:cust: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:cust"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:cust: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:cust"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:cust: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:preload": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:preload"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:preload: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:preload": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:preload"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:preload: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:preload": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:preload"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:preload: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:product"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:product: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 50,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:product"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:product: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:product"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:product: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 41,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:super": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:super"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:super: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 44,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:super": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:super"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:super: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:super": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:super"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:super: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 45,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta_system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta_system"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta_system: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta_system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta_system"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta_system: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 31,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta_system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta_system"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta_system: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta_vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta_vendor"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta_vendor: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta_vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta_vendor"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta_vendor: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta_vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta_vendor"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta_vendor: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta_odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta_odm"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta_odm: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 49,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta_odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta_odm"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta_odm: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 37,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta_odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta_odm"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta_odm: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta_hw_product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta_hw_product"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta_hw_product: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta_hw_product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta_hw_product"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta_hw_product: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta_hw_product": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta_hw_product"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta_hw_product: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vbmeta_cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vbmeta_cust"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vbmeta_cust: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vbmeta_cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vbmeta_cust"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vbmeta_cust: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vbmeta_cust": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vbmeta_cust"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vbmeta_cust: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:system"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:system: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:system"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:system: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:system": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:system"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:system: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 47,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:vendor"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:vendor: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:vendor"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:vendor: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:vendor": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:vendor"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:vendor: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 39,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:odm"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:odm: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 41,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:odm"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:odm: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 43,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:odm": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:odm"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:odm: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 44,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:boot": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:boot"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:boot: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 40,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:boot": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:boot"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:boot: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 27,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:boot": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:boot"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:boot: undefine\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 52,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:ramdisk: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 27,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:ramdisk: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 49,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:ramdisk: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 41,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:recovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:recovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:recovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 31,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:recovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:recovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:recovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:recovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:recovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:recovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:erecovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:erecovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:erecovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 49,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:erecovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:erecovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:erecovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 31,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:erecovery_ramdisk": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:erecovery_ramdisk"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:erecovery_ramdisk: undefine\nFinished. Total time: 0.003s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-type:userdata": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-type:userdata"
+            ],
+            "returncode": 0,
+            "stdout": "partition-type:userdata: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 64,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar partition-size:userdata": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "partition-size:userdata"
+            ],
+            "returncode": 0,
+            "stdout": "partition-size:userdata: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 48,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "getvar has-slot:userdata": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "getvar",
+              "has-slot:userdata"
+            ],
+            "returncode": 0,
+            "stdout": "has-slot:userdata: undefine\nFinished. Total time: 0.002s",
+            "status": "ok",
+            "elapsed_ms": 32,
+            "error": null,
+            "parsed": {
+              "status": "undefined",
+              "value": "undefine",
+              "error": null
+            }
+          },
+          "oem device-info": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "device-info"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'invalid command')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 51,
+            "error": null
+          },
+          "oem get-bootinfo": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "get-bootinfo"
+            ],
+            "returncode": 0,
+            "stdout": "(bootloader)  unlocked\nOKAY [  0.001s]\nFinished. Total time: 0.001s",
+            "status": "ok",
+            "elapsed_ms": 33,
+            "error": null
+          },
+          "oem get-build-number": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "get-build-number"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (Device sent unknown status code: get_build_number failed!)\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 50,
+            "error": null
+          },
+          "oem get-product-model": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "get-product-model"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'FAIL')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 55,
+            "error": null
+          },
+          "oem oeminforead-SYSTEM_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-SYSTEM_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'Read oeminfo failed!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 62,
+            "error": null
+          },
+          "oem oeminforead-CUSTOM_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-CUSTOM_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'Read oeminfo failed!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 67,
+            "error": null
+          },
+          "oem oeminforead-PRELOAD_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-PRELOAD_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'Read oeminfo failed!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 80,
+            "error": null
+          },
+          "oem oeminforead-BASE_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-BASE_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'Read oeminfo failed!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 52,
+            "error": null
+          },
+          "oem oeminforead-VENDOR_COUNTRY": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-VENDOR_COUNTRY"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'The reason of failed input oem_nv_item error!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 47,
+            "error": null
+          },
+          "oem oeminforead-CUST_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-CUST_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'The reason of failed input oem_nv_item error!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 43,
+            "error": null
+          },
+          "oem oeminforead-OEMINFO_CUST_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-OEMINFO_CUST_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'The reason of failed input oem_nv_item error!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 49,
+            "error": null
+          },
+          "oem oeminforead-OEMINFO_PRELOAD_VERSION": {
+            "command": [
+              "D:\\projects\\in progress\\#MIBU\\.build-tools\\android-sdk\\platform-tools\\fastboot.exe",
+              "-s",
+              "5T5PUB194L059785",
+              "oem",
+              "oeminforead-OEMINFO_PRELOAD_VERSION"
+            ],
+            "returncode": 1,
+            "stdout": "FAILED (remote: 'The reason of failed input oem_nv_item error!')\nfastboot: error: Command failed",
+            "status": "error",
+            "elapsed_ms": 45,
+            "error": null
+          }
+        }
+      }
+    },
+    "status": "probed"
+  },
+  "findings": [
+    {
+      "level": "info",
+      "code": "FASTBOOT_PRESENT",
+      "message": "1 device(s) answered fastboot."
+    },
+    {
+      "level": "info",
+      "code": "FASTBOOT_PRODUCT",
+      "message": "Fastboot product is kirin980."
+    },
+    {
+      "level": "critical",
+      "code": "OEMINFO_MAIN_VERSION_MISSING",
+      "message": "Huawei rescue reports NO MAIN VERSION. The main-version identity in OEMINFO is absent or unreadable."
+    },
+    {
+      "level": "critical",
+      "code": "OEMINFO_VENDORCOUNTRY_UNREADABLE",
+      "message": "Huawei fastboot cannot read vendor/country from OEMINFO."
+    },
+    {
+      "level": "info",
+      "code": "HUAWEI_BOOTINFO",
+      "message": "Huawei OEM boot info reports unlocked."
+    },
+    {
+      "level": "info",
+      "code": "FASTBOOT_COVERAGE",
+      "message": "Fastboot returned 5 concrete value(s) and explicitly reported 109 value(s) as undefined."
+    }
+  ]
+}

@@ -108,6 +108,20 @@ Read from extracted package tag files:
 This confirms the three extracted packages identify themselves as base, CUST,
 and PRELOAD packages.
 
+## Archive central-directory check
+
+The three ZIP central directories were read again on 2026-07-30 without
+extracting or changing the archives:
+
+| Archive | ZIP bytes | Entries | `UPDATE.APP` bytes | `PTABLE.APP` bytes | Verlist bytes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `update_sd_base.zip` | 4,308,716,151 | 15 | 5,215,671,288 | 202,420 | 38 |
+| `update_sd_cust_VOG-L29_hw_meafnaf.zip` | 37,292 | 14 | 9,456,216 | 1,320 | 299 |
+| `update_sd_preload_VOG-L29_hw_meafnaf_R5.zip` | 251,722,738 | 14 | 283,989,904 | 1,432 | 408 |
+
+This confirms the expected named records exist in all three archives. It is not
+a full decompression or signature-verification test.
+
 ## CUST/PRELOAD metadata files
 
 The small ptable metadata files are plain text:
@@ -122,6 +136,19 @@ The corresponding verlist files are present:
 ```text
 update_sd_cust_VOG-L29_hw_meafnaf\SOFTWARE_VER_LIST.mbn
 update_sd_preload_VOG-L29_hw_meafnaf_R5\SOFTWARE_VER_LIST.mbn
+```
+
+The package containers that hold the `CUST_VER` and `PRELOAD_VER` records were
+also preserved:
+
+```text
+CUST PTABLE.APP
+size:   1320
+SHA256: 02153C26869DF306D91B24C9E1CE16A606C0E47DA1CA25EFBA8D6C1A357F175F
+
+PRELOAD PTABLE.APP
+size:   1432
+SHA256: 2FB5D1F53A062EC6C615E72CE26CE09E7A64BA7FC3CC2BE216EFE7B6F7D0E46B
 ```
 
 Working interpretation:
@@ -165,6 +192,21 @@ It also includes fastboot image handling for `preload`, `product`, `version`,
 
 This confirms the source evidence is AL00 board software and the target evidence
 is L29 C185 service firmware. It does not prove the live phone's current state.
+
+Original AL00 board-file preservation hashes:
+
+```text
+oeminfo.mbn
+size:   100663296
+SHA256: D610673092E1199B4B649727B3FA59C2F2EC801072D6AC5B16D37A00662F20B6
+
+oeminfo_crc.mbn
+size:   6144
+SHA256: CA7609A4EB6CAE058C7751E146A55053A9FC3063CA9E619F2032E3B31FFC1ED0
+```
+
+These hashes preserve source-board evidence. They do not make the AL00 OEMINFO
+safe to write into the partly converted L29 device.
 
 ## Decision impact
 
