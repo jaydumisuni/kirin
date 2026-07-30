@@ -1,0 +1,104 @@
+Xray Android Device Readout
+===========================
+
+Started: 2026-07-30T22:06:18+00:00
+Finished: 2026-07-30T22:06:33+00:00
+Safety: Xray did not request flash, erase, reboot, boot, unlock, relock, format, continue, or partition fetch operations.
+
+Findings
+--------
+[INFO] FASTBOOT_PRESENT: 1 device(s) answered fastboot.
+[INFO] FASTBOOT_PRODUCT: Fastboot product is kirin980.
+[CRITICAL] OEMINFO_MAIN_VERSION_MISSING: Huawei rescue reports NO MAIN VERSION. The main-version identity in OEMINFO is absent or unreadable.
+[CRITICAL] OEMINFO_VENDORCOUNTRY_UNREADABLE: Huawei fastboot cannot read vendor/country from OEMINFO.
+[INFO] HUAWEI_BOOTINFO: Huawei OEM boot info reports unlocked.
+[INFO] FASTBOOT_COVERAGE: Fastboot returned 5 concrete value(s) and explicitly reported 109 value(s) as undefined.
+
+Tools
+-----
+adb: D:\projects\in progress\#MIBU\.build-tools\android-sdk\platform-tools\adb.exe (Android Debug Bridge version 1.0.41)
+fastboot: D:\projects\in progress\#MIBU\.build-tools\android-sdk\platform-tools\fastboot.exe (fastboot version 37.0.0-14910828)
+
+Windows USB and COM
+-------------------
+Manufacturer and provider names in this section describe Windows drivers or USB descriptors; they are not trusted phone identity.
+- Android Bootloader Interface | provider=LeMobile | class=AndroidUsbDeviceClass | service=WinUSB | id=USB\VID_18D1&PID_D00D\5&242A2F40&0&1
+
+ADB
+---
+No ADB device answered.
+
+Fastboot
+--------
+- 5T5PUB194L059785 | state=fastboot
+  product: kirin980 [value]
+  product-name: undefine [undefined]
+  device: undefine [undefined]
+  device-codename: undefine [undefined]
+  model: undefine [undefined]
+  sku: undefine [undefined]
+  variant: undefine [undefined]
+  hw-revision: undefine [undefined]
+  serialno: serialv1.0 [value]
+  version: 0.5 [value]
+  version-bootloader: undefine [undefined]
+  version-baseband: undefine [undefined]
+  version-os: undefine [undefined]
+  version-vndk: undefine [undefined]
+  os-version: undefine [undefined]
+  android-version: undefine [undefined]
+  security-patch-level: undefine [undefined]
+  build-number: undefine [undefined]
+  build-version: undefine [undefined]
+  current-slot: undefine [undefined]
+  slot-count: undefine [undefined]
+  slot-suffixes: undefine [undefined]
+  is-userspace: undefine [undefined]
+  secure: undefine [undefined]
+  unlocked: undefine [undefined]
+  lock-state: undefine [undefined]
+  device-state: undefine [undefined]
+  frp: undefine [undefined]
+  frp-state: undefine [undefined]
+  anti: undefine [undefined]
+  anti-rollback: undefine [undefined]
+  rollback-index: undefine [undefined]
+  battery-voltage: undefine [undefined]
+  battery-soc-ok: undefine [undefined]
+  off-mode-charge: undefine [undefined]
+  charger-screen-enabled: undefine [undefined]
+  max-download-size: 471859200 [value]
+  logical-block-size: undefine [undefined]
+  erase-block-size: undefine [undefined]
+  page-size: undefine [undefined]
+  rescue_phoneinfo: NO MAIN VERSION [value]
+  vendorcountry: getvar:vendorcountry                               FAILED (remote: 'cannot get vendorcountry in oeminfo') [error]
+  boot-mode: undefine [undefined]
+  crc: undefine [undefined]
+  dp-level: undefine [undefined]
+  unlock-token: undefine [undefined]
+  parallel-download: undefine [undefined]
+  cpu-id: undefine [undefined]
+  flash-id: undefine [undefined]
+  ram-size: undefine [undefined]
+  internal-memory-size: undefine [undefined]
+  imei: undefine [undefined]
+  imei1: undefine [undefined]
+  imei2: undefine [undefined]
+  OEM read probes:
+    oem device-info: FAILED (remote: 'invalid command') [error]
+    oem get-bootinfo: unlocked [ok]
+    oem get-build-number: FAILED (Device sent unknown status code: get_build_number failed!) [error]
+    oem get-product-model: FAILED (remote: 'FAIL') [error]
+    oem oeminforead-SYSTEM_VERSION: FAILED (remote: 'Read oeminfo failed!') [error]
+    oem oeminforead-CUSTOM_VERSION: FAILED (remote: 'Read oeminfo failed!') [error]
+    oem oeminforead-PRELOAD_VERSION: FAILED (remote: 'Read oeminfo failed!') [error]
+    oem oeminforead-BASE_VERSION: FAILED (remote: 'Read oeminfo failed!') [error]
+    oem oeminforead-VENDOR_COUNTRY: FAILED (remote: 'The reason of failed input oem_nv_item error!') [error]
+    oem oeminforead-CUST_VERSION: FAILED (remote: 'The reason of failed input oem_nv_item error!') [error]
+    oem oeminforead-OEMINFO_CUST_VERSION: FAILED (remote: 'The reason of failed input oem_nv_item error!') [error]
+    oem oeminforead-OEMINFO_PRELOAD_VERSION: FAILED (remote: 'The reason of failed input oem_nv_item error!') [error]
+
+Interpretation boundary
+-----------------------
+A field marked undefined was rejected or omitted by the current device protocol. Xray does not invent a value from the chipset, USB driver, firmware folder, or target conversion profile.

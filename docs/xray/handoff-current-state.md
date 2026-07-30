@@ -11,6 +11,13 @@ Date: 2026-07-30
   `3b16ad6 Document VOG-L29 C185 conversion notes`
 - Remote status after push: clean, `main` tracks `origin/main`
 
+Xray now also has an executable read-only collector under `xray/`. Its first
+raw live capture is preserved under:
+
+```text
+evidence\xray\2026-07-30-vog-fastboot-final
+```
+
 ## Local evidence state
 
 Firmware evidence is on Athena at:
@@ -88,6 +95,8 @@ Important interpretation:
   extracted firmware contains the matching CUST/PRELOAD metadata.
 - The likely issue is the flashing mode/tool path rejecting CUST/PRELOAD
   version-table and partition-table metadata on an AL00 to L29 conversion.
+- A newer full Xray read proves that the phone currently has no fastboot-visible
+  main version and cannot return vendor/country or Huawei OEMINFO version items.
 
 ## What to solve before using the phone battery again
 
@@ -97,7 +106,9 @@ Important interpretation:
 2. Find whether the tool expects these names directly or maps them from:
    `SOFTWARE_VER_LIST.mbn`, `PTABLE_CUST.mbn`, and `PTABLE_PRELOAD.mbn`.
 3. Avoid mixing metadata from another firmware version.
-4. Do not rewrite OEMINFO again unless the current values are proven wrong.
+4. Treat the OEMINFO/main-version state as damaged or incomplete. Do not write a
+   guessed AL00 or L29 OEMINFO image until the exact service-tool operation,
+   backup path, and expected readback are established.
 5. Do not relock the bootloader/security state before final boot verification.
 
 ## Additional firmware readout
@@ -124,6 +135,10 @@ reports `rescue_phoneinfo: NO MAIN VERSION` and cannot read vendor/country from
 OEMINFO. This moves OEMINFO/main-version repair ahead of another CUST/PRELOAD
 write attempt.
 
+Also read `docs/xray/xray-live-capture-2026-07-30.md` and
+`docs/xray/external-tool-readout-2026-07-30.md`. They compare the user's second
+tool with the new Xray collector and preserve the complete raw command evidence.
+
 ## What remains unverified
 
 - Final boot result after `VBMETA_HW_PRODUCT` succeeded.
@@ -131,12 +146,20 @@ write attempt.
 - Whether both IMEIs, baseband, SIM slots, Wi-Fi, and camera work.
 - Whether CUST/PRELOAD show a valid regional state or fall back to `C900`.
 - Whether OTA validation works.
+- The exact service tool and operation that can restore a valid
+  `VOG-L29 / hw / meafnaf` main-version identity without reverting the device to
+  AL00 or damaging security data.
+- A backup of the phone's current OEMINFO/security-sensitive state.
+- Whether the original IMEIs and calibration data are still present; fastboot
+  cannot read them in the current state.
 
 ## Next chat pickup prompt
 
-Continue from `jaydumisuni/kirin` commit `3b16ad6` plus
+Continue from the latest `jaydumisuni/kirin` `main` plus
 `docs/xray/handoff-current-state.md`. We need to solve the Huawei P30 Pro
 `VOG-AL00` to `VOG-L29 C185` CUST/PRELOAD metadata write problem before touching
-the phone again. Focus on how to write `CUST_VERLIST`, `CUST_VER`, `PTABLE_CUST`,
-`PRELOAD_VERLIST`, `PRELOAD_VER`, and `PTABLE_PRELOAD` from the matching
+the phone again. First establish a backup-capable service path that restores and
+reads back the missing `VOG-L29 / hw / meafnaf` OEMINFO/main-version identity.
+Then process `CUST_VERLIST`, `CUST_VER`, `PTABLE_CUST`, `PRELOAD_VERLIST`,
+`PRELOAD_VER`, and `PTABLE_PRELOAD` from the matching
 `VOGUE-L29D 10.0.0.186(C185E8R5P1)` package without mixing firmware.

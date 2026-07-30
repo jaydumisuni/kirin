@@ -118,6 +118,9 @@ Then do this sequence:
    cannot get vendorcountry in oeminfo
    ```
 
+   Before the write, require the service tool to show that it can back up the
+   current OEMINFO and preserve IMEI/calibration/security-sensitive data. Do not
+   use the AL00 board `oeminfo.mbn` as a guessed L29 repair image.
 3. Read back phone info with the service tool and save a photo/log before any
    further write: model, build, vendor/country, OEMINFO, boot mode, baseband,
    and any CUST or PRELOAD version fields the tool can show.
@@ -185,6 +188,7 @@ Current OEMINFO values
 Current CUST/PRELOAD values, if shown
 Exact tool name and version
 Complete operation log
+OEMINFO backup file path, size, and SHA-256
 ```
 
 After any write:

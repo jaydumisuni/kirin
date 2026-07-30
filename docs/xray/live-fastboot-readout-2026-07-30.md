@@ -15,6 +15,10 @@ Tool path used:
 D:\projects\Huawei kirin\P10Revive\P10 Revive\tools_fw\fastboot.exe
 ```
 
+A second capture later used platform-tools `37.0.0-14910828` from MIBU and
+confirmed the same results. See `xray-live-capture-2026-07-30.md` and the raw
+files under `evidence/xray/2026-07-30-vog-fastboot-final`.
+
 ## Device detection
 
 ```text
@@ -191,7 +195,7 @@ PTABLE_PRELOAD
 
 Working interpretation: the CUST/PRELOAD metadata failure is likely downstream
 of missing/incomplete OEMINFO version identity, not only a CUST/PRELOAD package
-write problem.
+write problem. This is a strong consistency finding, not yet proven causation.
 
 ## Next action impact
 
