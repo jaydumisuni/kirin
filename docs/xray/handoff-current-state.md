@@ -7,7 +7,8 @@ Date: 2026-07-30
 - GitHub repo: `https://github.com/jaydumisuni/kirin`
 - Local repo: `D:\projects\kirin`
 - Branch: `main`
-- Current commit: `3b16ad6 Document VOG-L29 C185 conversion notes`
+- Current commit before this handoff note was first written:
+  `3b16ad6 Document VOG-L29 C185 conversion notes`
 - Remote status after push: clean, `main` tracks `origin/main`
 
 ## Local evidence state
@@ -98,6 +99,18 @@ Important interpretation:
 3. Avoid mixing metadata from another firmware version.
 4. Do not rewrite OEMINFO again unless the current values are proven wrong.
 5. Do not relock the bootloader/security state before final boot verification.
+
+## Additional firmware readout
+
+Read `docs/xray/vog-l29-c185-firmware-readout.md` before choosing the next live
+phone action. It confirms from local Huawei documents that:
+
+- the release notes target `VOG-L29 10.0.0.186(C185E8R5P1)`;
+- the upgrade guideline requires the three `dload` files: base, CUST, PRELOAD;
+- `05016EUP` is a VOG-L29 C185E8R5P1 delivery variant;
+- CUST/PRELOAD metadata exists locally and is not simply missing from the
+  package;
+- the next phone step should be a read/log capture, not a blind write.
 
 ## What remains unverified
 
