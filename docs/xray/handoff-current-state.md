@@ -139,6 +139,14 @@ Also read `docs/xray/xray-live-capture-2026-07-30.md` and
 `docs/xray/external-tool-readout-2026-07-30.md`. They compare the user's second
 tool with the new Xray collector and preserve the complete raw command evidence.
 
+Also read
+`docs/xray/unlocktool-static-kirin980-observations-2026-07-31.md`. Static,
+sanitized UnlockTool logs show that the service path wrote a generic patched
+`sec_fastboot` after a Kirin 980 test-point sequence. A later OEMINFO operation
+was acknowledged for `VOG-L29 / hw / meafnaf`, but the subsequent Xray read still
+reported `NO MAIN VERSION`. Treat that event as an attempted write, not proof of
+a repaired or persistent OEMINFO identity.
+
 ## What remains unverified
 
 - Final boot result after `VBMETA_HW_PRODUCT` succeeded.

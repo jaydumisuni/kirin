@@ -16,6 +16,9 @@ succeeded or failed, and what still needs direct verification on the device.
   conversion notes.
 - `docs/xray/vog-l29-c185-firmware-readout.md` - readout from the local Huawei
   release docs, package tags, CUST/PRELOAD metadata, and AL00 board XML.
+- `docs/xray/unlocktool-static-kirin980-observations-2026-07-31.md` - sanitized
+  static evidence for the Kirin 980 test-point, patched-fastboot, and OEMINFO
+  workflow observed in the local UnlockTool installation.
 - `evidence/xray/2026-07-30-vog-fastboot-final/` - reviewed raw JSON and text
   from the Xray live-device capture. The earlier sibling folder is retained as
   preliminary evidence.
