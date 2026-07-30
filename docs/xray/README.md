@@ -1,0 +1,26 @@
+# Xray
+
+Xray is the project notebook for Kirin recovery work. Each entry should separate
+observed evidence from assumptions and unverified next steps.
+
+## Entry format
+
+Use one Markdown file per recovery or conversion case.
+
+Recommended sections:
+
+- Scope: source model, target model, target region, and firmware build.
+- Local evidence: firmware paths, extracted package names, and hashes for small
+  metadata files.
+- Observed workflow: OEMINFO values, flash sequence, successful writes, failed
+  writes, and tool behavior.
+- Interpretation: what the evidence suggests, with uncertainty called out.
+- Recovery checklist: steps to repeat or avoid.
+- Unverified items: anything not proven by logs, photos, or a final boot test.
+
+## Evidence handling
+
+Do not overwrite extracted firmware, screenshots, logs, or service-tool output.
+Reference them by path and add a new dated note when the interpretation changes.
+If a large binary is important, record its path, size, and SHA-256 hash instead
+of committing it.

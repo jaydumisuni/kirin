@@ -1,0 +1,16 @@
+# Kirin
+
+Field notes and evidence indexes for Huawei Kirin recovery and conversion work.
+
+This repository is structured around **Xray**, a documentation layer for capturing
+what was observed during a repair, which files were present, which writes
+succeeded or failed, and what still needs direct verification on the device.
+
+## Xray structure
+
+- `docs/xray/README.md` - how Xray entries are organized.
+- `docs/xray/vog-al00-to-vog-l29-c185.md` - current VOG-AL00 to VOG-L29 C185
+  conversion notes.
+
+Firmware binaries are not stored in this repository. Evidence is referenced by
+local path, package name, file size, and hash where useful.
