@@ -112,6 +112,12 @@ phone action. It confirms from local Huawei documents that:
   package;
 - the next phone step should be a read/log capture, not a blind write.
 
+Also read `docs/xray/next-fix-plan.md`. It adds the stronger finding that
+`CUST_VER`, `PRELOAD_VER`, `CUST_VERLIST`, `PRELOAD_VERLIST`, `PTABLE_CUST`, and
+`PTABLE_PRELOAD` are embedded in the package `PTABLE.APP` records, and it
+recommends using the complete official three-part dload/offline update path after
+charging and live phone readback.
+
 ## What remains unverified
 
 - Final boot result after `VBMETA_HW_PRODUCT` succeeded.
