@@ -118,6 +118,12 @@ Also read `docs/xray/next-fix-plan.md`. It adds the stronger finding that
 recommends using the complete official three-part dload/offline update path after
 charging and live phone readback.
 
+Also read `docs/xray/live-fastboot-readout-2026-07-30.md`. The phone is visible
+in fastboot as `5T5PUB194L059785`, bootloader reports `unlocked`, but fastboot
+reports `rescue_phoneinfo: NO MAIN VERSION` and cannot read vendor/country from
+OEMINFO. This moves OEMINFO/main-version repair ahead of another CUST/PRELOAD
+write attempt.
+
 ## What remains unverified
 
 - Final boot result after `VBMETA_HW_PRODUCT` succeeded.

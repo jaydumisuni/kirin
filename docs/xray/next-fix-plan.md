@@ -7,14 +7,17 @@ Date: 2026-07-30
 We have enough information to avoid blind file hunting. We do not yet have enough
 information to guarantee the phone is fixed without a live read.
 
-Current confidence:
+Current confidence after live fastboot read:
 
 - High: the target package is correct for `VOG-L29 hw/meafnaf C185E8R5P1`.
 - High: the failed CUST/PRELOAD metadata exists inside the package.
 - High: `VBMETA_HW_PRODUCT` must be written and was a real blocker.
-- Medium-high: the remaining blocker is the flashing path/tool mode, not missing
-  firmware.
-- Not proven: the live phone's current state after the last write.
+- High: the phone is currently visible in fastboot and reports bootloader
+  `unlocked`.
+- High: fastboot reports `NO MAIN VERSION` and cannot read vendor/country from
+  OEMINFO.
+- Medium-high: the CUST/PRELOAD failures are likely downstream of incomplete or
+  unreadable OEMINFO/main-version identity.
 
 ## Key evidence pulled from package internals
 
@@ -105,10 +108,20 @@ requires battery above 30% at the start of the upgrade.
 
 Then do this sequence:
 
-1. Read phone info with the service tool and save a photo/log before writing:
-   model, build, vendor/country, OEMINFO, boot mode, baseband, and any CUST or
-   PRELOAD version fields the tool can show.
-2. If the phone can enter EMUI 10 recovery update mode, use the complete official
+1. Do not run the `P10Revive` batch files. They target P10 `VTR-*`, not P30 Pro
+   `VOG-*`.
+2. Repair or restore the VOG-L29 OEMINFO/main-version identity so fastboot no
+   longer reports:
+
+   ```text
+   rescue_phoneinfo: NO MAIN VERSION
+   cannot get vendorcountry in oeminfo
+   ```
+
+3. Read back phone info with the service tool and save a photo/log before any
+   further write: model, build, vendor/country, OEMINFO, boot mode, baseband,
+   and any CUST or PRELOAD version fields the tool can show.
+4. If the phone can enter EMUI 10 recovery update mode, use the complete official
    `dload` set through SD/OTG force upgrade:
 
    ```text
@@ -121,10 +134,10 @@ Then do this sequence:
    This is preferred because Huawei's own `update-binary` knows how to process
    `CUST_VERLIST`, `CUST_VER`, `PTABLE_CUST`, `PRELOAD_VERLIST`, `PRELOAD_VER`,
    and `PTABLE_PRELOAD` from the matched package.
-3. If recovery SD/OTG update is not accessible, use a service-tool mode that
+5. If recovery SD/OTG update is not accessible, use a service-tool mode that
    flashes the whole three-part dload/offline update package, not only extracted
    individual partitions.
-4. If using an individual-partition tool, do not point `CUST_VERLIST` or
+6. If using an individual-partition tool, do not point `CUST_VERLIST` or
    `PRELOAD_VERLIST` at random files from another build. The matching source is:
 
    ```text
