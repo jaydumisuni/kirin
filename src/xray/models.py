@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 SCHEMA = "xray-report-v1"
 
 
