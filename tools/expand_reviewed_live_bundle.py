@@ -8,6 +8,7 @@ from pathlib import Path
 
 EXPECTED_SHA256 = "27abe1ef5a3011bc636bc99207e0931c83681cc5b194029cfbfe8a68d49a0521"
 PART_GLOB = "tools/xray_live_reviewed_bundle.part*"
+EXPECTED_PARTS = 11
 ALLOWED = {
     "README.md",
     "docs/xray/live-provider-session-core.md",
@@ -33,8 +34,8 @@ def main() -> int:
     """Verify and extract the exact locally reviewed Xray source bundle."""
 
     parts = sorted(Path.cwd().glob(PART_GLOB))
-    if len(parts) != 7:
-        raise SystemExit(f"expected 7 bundle parts, found {len(parts)}")
+    if len(parts) != EXPECTED_PARTS:
+        raise SystemExit(f"expected {EXPECTED_PARTS} bundle parts, found {len(parts)}")
     encoded = "".join(part.read_text(encoding="ascii").strip() for part in parts)
     archive = base64.b64decode(encoded, validate=True)
     actual = hashlib.sha256(archive).hexdigest()
