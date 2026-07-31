@@ -1,0 +1,14 @@
+[package]
+name = "xray-core"
+version = "0.1.0"
+edition = "2021"
+description = "Deterministic policy spine for THETECHGUY Xray"
+publish = false
+
+[lib]
+name = "xray_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "xray-core"
+path = "src/main.rs"

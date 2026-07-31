@@ -1,0 +1,96 @@
+{
+  "schema": "xray-knowledge-v1",
+  "version": "0.1.0",
+  "source_weights": {
+    "direct_silicon": 100,
+    "artifact_custody": 100,
+    "bootrom_id": 90,
+    "device_read": 80,
+    "signed_firmware": 75,
+    "device_tree": 70,
+    "board_identifier": 60,
+    "technician_repeat": 45,
+    "oem_online": 40,
+    "specialist_online": 25,
+    "retailer_online": 10,
+    "loader_compatibility": 5,
+    "unsourced": 2
+  },
+  "usb_signatures": [
+    {
+      "vid": "1782",
+      "family": "UNISOC",
+      "confidence": 0.95,
+      "note": "UNISOC/SPRD USB family signature"
+    },
+    {
+      "vid": "05AC",
+      "family": "Apple",
+      "confidence": 0.99,
+      "note": "Apple USB vendor signature"
+    },
+    {
+      "vid": "0E8D",
+      "family": "MediaTek",
+      "confidence": 0.95,
+      "note": "MediaTek USB family signature"
+    },
+    {
+      "vid": "05C6",
+      "family": "Qualcomm",
+      "confidence": 0.90,
+      "note": "Qualcomm USB family signature; mode still requires PID/interface evidence"
+    },
+    {
+      "vid": "04E8",
+      "family": "Samsung",
+      "confidence": 0.95,
+      "note": "Samsung USB vendor signature"
+    }
+  ],
+  "apple_usb_modes": {
+    "1227": "DFU",
+    "1281": "Recovery",
+    "12A8": "Normal",
+    "12AB": "Normal"
+  },
+  "proof_policies": {
+    "exact_soc": {
+      "mandatory_any": [
+        "hardware.silicon_id",
+        "hardware.bootrom_id",
+        "hardware.cpu_signature",
+        "hardware.gpu_signature"
+      ],
+      "hard_rule": "A selected loader profile is compatibility evidence, never exact-silicon proof."
+    },
+    "write_authorization": {
+      "enabled": false,
+      "hard_rule": "Xray first-run is read-only. No claim can authorize a write operation."
+    }
+  },
+  "expected_apple_providers": [
+    "apple-usb",
+    "usbmux",
+    "mobiledevice",
+    "irecovery",
+    "dfu"
+  ],
+  "rules": [
+    {
+      "id": "loader-profile-is-not-silicon",
+      "when": "transport.loader_profile exists",
+      "effect": "record loader compatibility separately; do not certify hardware.exact_soc"
+    },
+    {
+      "id": "huawei-no-main-version-blocks-identity",
+      "when": "firmware.main_version == NO MAIN VERSION",
+      "effect": "block identity-dependent operations and require OEMINFO/main-version readback"
+    },
+    {
+      "id": "variant-claims-are-not-transitive",
+      "when": "external model differs from observed model",
+      "effect": "do not transfer chipset or firmware claims across variants without explicit evidence"
+    }
+  ]
+}
