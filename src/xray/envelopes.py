@@ -16,7 +16,7 @@ class EnvelopeJournal:
         self._lock = threading.RLock()
 
     def append(self, envelope: RawEvidenceEnvelope) -> None:
-        """Verify and append one envelope atomically at line granularity."""
+        """Verify and serialize one envelope atomically among threads in this process."""
 
         if not envelope.verify():
             raise ValueError(f"invalid evidence envelope: {envelope.envelope_id}")
@@ -33,10 +33,13 @@ class EnvelopeJournal:
             self.append(envelope)
 
     @staticmethod
-    def _from_dict(payload: dict) -> RawEvidenceEnvelope:
-        payload = dict(payload)
-        payload["sensitive_fields"] = tuple(payload.get("sensitive_fields", ()))
-        return RawEvidenceEnvelope(**payload)
+    def _from_dict(payload: dict, *, line_number: int) -> RawEvidenceEnvelope:
+        try:
+            normalized = dict(payload)
+            normalized["sensitive_fields"] = tuple(normalized.get("sensitive_fields", ()))
+            return RawEvidenceEnvelope(**normalized)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"malformed evidence envelope at line {line_number}: {exc}") from exc
 
     def replay(self) -> tuple[RawEvidenceEnvelope, ...]:
         """Read and verify the entire journal."""
@@ -49,8 +52,13 @@ class EnvelopeJournal:
             for line_number, line in enumerate(handle, start=1):
                 if not line.strip():
                     continue
-                payload = json.loads(line)
-                envelope = self._from_dict(payload)
+                try:
+                    payload = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"corrupt journal line {line_number}: {exc}") from exc
+                if not isinstance(payload, dict):
+                    raise ValueError(f"malformed evidence envelope at line {line_number}: record must be an object")
+                envelope = self._from_dict(payload, line_number=line_number)
                 if envelope.envelope_id in seen:
                     raise ValueError(f"duplicate envelope ID at line {line_number}: {envelope.envelope_id}")
                 if not envelope.verify():
