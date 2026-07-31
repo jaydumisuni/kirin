@@ -6,6 +6,8 @@ on:
     paths:
       - "tools/xray_bundle.part*"
       - ".github/workflows/xray-bootstrap.yml"
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
@@ -16,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - name: Verify and expand locally tested bundle
         run: |
           python - <<'PY'
@@ -38,8 +42,7 @@ jobs:
               bundle.extractall(root)
           for part in parts:
               part.unlink()
-          workflow = root / ".github" / "workflows" / "xray-bootstrap.yml"
-          workflow.unlink()
+          (root / ".github" / "workflows" / "xray-bootstrap.yml").unlink()
           PY
       - name: Commit exact verified sources
         run: |
@@ -48,4 +51,4 @@ jobs:
           git add -A
           git diff --cached --check
           git commit -m "Add Xray first usable runtime"
-          git push
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
