@@ -59,7 +59,7 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[test]"
       - run: python tools/review_live_core.py
-      - run: python -m xray.live_cli simulate all --format json
+      - run: xray-live simulate all --format json
 
   rust-proof:
     runs-on: ubuntu-latest
