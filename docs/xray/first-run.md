@@ -90,9 +90,11 @@ cargo clippy --manifest-path rust/Cargo.toml --all-targets -- -D warnings
 cargo test --manifest-path rust/Cargo.toml
 ```
 
-Python verification was executed before repository submission. Rust is also
-verified in GitHub Actions because the initial isolated build workspace did not
-contain a Rust toolchain.
+Python compile, tests, self-tests, knowledge verification, installation and host
+scan were executed before repository submission. The isolated build workspace
+did not contain a Rust toolchain, so the Rust crate received static review and
+its compile, formatting, Clippy and test proof is enforced by the repository
+workflow rather than being claimed from an unavailable local toolchain.
 
 ## Frozen safety rules
 
