@@ -35,7 +35,7 @@ jobs:
       - name: Install standard package
         if: matrix.install-mode == 'standard'
         run: python -m pip install ".[test]"
-      - run: python -m compileall -q src tests
+      - run: python -m compileall -q src tests tools
       - run: pytest
       - run: python -m xray selftest --format json
       - run: python -m xray knowledge-verify
@@ -46,6 +46,20 @@ jobs:
           workdir="$(mktemp -d)"
           cd "$workdir"
           env -u XRAY_PROJECT_ROOT python -m xray knowledge-verify --format json
+
+  live-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[test]"
+      - run: python tools/review_live_core.py
+      - run: python -m xray.live_cli simulate all --format json
 
   rust-proof:
     runs-on: ubuntu-latest
