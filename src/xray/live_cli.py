@@ -10,7 +10,7 @@ from .envelopes import EnvelopeJournal
 from .live_runtime import XrayLiveRuntime, doctor_live
 from .providers import SubprocessRunner, default_registry
 from .sessions import SessionRegistry
-from .simulation import run_simulation
+from .simulation import run_simulation, validate_simulation
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -49,7 +49,7 @@ def _text_simulation(payload: dict) -> str:
         f"Xray Live simulation: {payload['scenario']}",
         f"Reports: {len(payload['reports'])}",
         f"Sessions: {len(payload['sessions'])}",
-        f"Evidence envelopes: {payload['journal']['envelopes']}",
+        f"Evidence envelopes: {(payload.get('journal') or {}).get('envelopes', 0)}",
         "Write authorized: NO",
         "Model required: NO",
         "",
@@ -108,16 +108,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.output.write_text(rendered + "\n", encoding="utf-8")
             else:
                 print(rendered)
-            results = [report["review"]["governor"]["result"] for report in payload["reports"]]
-            expected_blocked = 1 if args.scenario in {"p30", "all"} else 0
-            structure_ok = (
-                payload["journal"].get("valid") is True
-                and all(len(report["review"]["privates"]) == 20 for report in payload["reports"])
-                and results.count("BLOCKED") == expected_blocked
-                and all(result in {"LIVE_READ_ONLY_READY", "CONFLICTED", "BLOCKED"} for result in results)
-            )
-            # The P30 rescue fixture intentionally proves that NO MAIN VERSION remains blocked.
-            return 0 if structure_ok else 2
+            failures = validate_simulation(payload, args.scenario)
+            if failures:
+                print("xray-live: simulation invariants failed: " + "; ".join(failures), file=sys.stderr)
+                return 2
+            return 0
 
         if args.command == "watch":
             runtime = XrayLiveRuntime(
