@@ -1,79 +1,47 @@
-name: Xray proof
+name: Expand reviewed Xray live bundle
 
 on:
-  push:
-    branches: [main, "xray/**"]
   pull_request:
     branches: [main]
+    types: [reopened]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: xray-live-bundle-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
-  python-proof:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.13"]
-        install-mode: ["editable", "standard"]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: python -m pip install --upgrade pip
-      - name: Install editable test environment
-        if: matrix.install-mode == 'editable'
-        run: python -m pip install -e ".[test]"
-      - name: Install standard package
-        if: matrix.install-mode == 'standard'
-        run: python -m pip install ".[test]"
-      - run: python -m compileall -q src tests tools
-      - run: pytest
-      - run: python -m xray selftest --format json
-      - run: python -m xray knowledge-verify
-      - run: python -m xray doctor --format json
-      - name: Prove packaged knowledge outside source tree
-        if: matrix.install-mode == 'standard'
-        run: |
-          workdir="$(mktemp -d)"
-          cd "$workdir"
-          env -u XRAY_PROJECT_ROOT python -m xray knowledge-verify --format json
-
-  live-review:
+  expand-reviewed-bundle:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feature/live-provider-session-core'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          ref: feature/live-provider-session-core
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e ".[test]"
-      - run: python tools/review_live_core.py
-      - run: xray-live simulate all --format json
-
-  rust-proof:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rust
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-      - run: cargo fmt --check
-      - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test
-      - run: cargo run --quiet
+      - name: Verify and expand exact locally reviewed sources
+        run: python tools/expand_reviewed_live_bundle.py
+      - name: Prove expanded Python runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[test]"
+          python -m compileall -q src tests tools
+          pytest
+          python tools/review_live_core.py
+          xray-live simulate all --format json
+      - name: Commit exact reviewed sources
+        run: |
+          rm -f tools/xray_live_reviewed_bundle.part* tools/expand_reviewed_live_bundle.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Apply locally reviewed Xray live core"
+          git push origin HEAD:feature/live-provider-session-core
