@@ -19,19 +19,33 @@ def _run_wave(
     text: str,
     context: dict[str, Any],
 ) -> list[PrivateResult]:
+    """Run one governed worker wave with failure isolation and stable ordering."""
+
     results: list[PrivateResult] = []
     with ThreadPoolExecutor(max_workers=10, thread_name_prefix="xray-private") as pool:
-        futures = {pool.submit(func, text, context): func.__name__ for func in functions}
+        futures = {
+            pool.submit(func, text, context): (index, func.__name__)
+            for index, func in enumerate(functions, start=1)
+        }
         for future in as_completed(futures):
-            name = futures[future]
+            index, name = futures[future]
             try:
                 results.append(future.result())
             except Exception as exc:  # defensive isolation between privates
-                results.append(PrivateResult(f"failed:{name}", context.get("wave", 0), name, errors=(str(exc),)))
-    return sorted(results, key=lambda item: item.private_id)
+                results.append(
+                    PrivateResult(
+                        f"failed-{index:03d}:{name}",
+                        context.get("wave", 0),
+                        name,
+                        errors=(str(exc),),
+                    )
+                )
+    return sorted(results, key=lambda item: (item.wave, item.private_id))
 
 
 def _all_values(evidence: Sequence[Evidence]) -> dict[str, list[str]]:
+    """Group unique evidence values by key."""
+
     result: dict[str, list[str]] = {}
     for item in evidence:
         result.setdefault(item.key, [])
@@ -40,8 +54,9 @@ def _all_values(evidence: Sequence[Evidence]) -> dict[str, list[str]]:
     return result
 
 
-def _parse_external_claim(raw: str) -> dict[str, str]:
-    # key=value|source_class|applies_to_model
+def parse_external_claim(raw: str) -> dict[str, str]:
+    """Parse `key=value|source_class|applies_to_model` input."""
+
     if "=" not in raw:
         raise ValueError("External claims use key=value|source_class|model")
     key, tail = raw.split("=", 1)
@@ -54,7 +69,13 @@ def _parse_external_claim(raw: str) -> dict[str, str]:
     }
 
 
+# Backward-compatible private alias for early integrations.
+_parse_external_claim = parse_external_claim
+
+
 def _external_evidence(claims: Sequence[Mapping[str, str]]) -> list[Evidence]:
+    """Convert external claims into explicitly unobserved evidence."""
+
     output: list[Evidence] = []
     for index, claim in enumerate(claims, start=1):
         key = claim.get("key", "").strip()
@@ -76,6 +97,8 @@ def _external_evidence(claims: Sequence[Mapping[str, str]]) -> list[Evidence]:
 
 
 def _context_from_evidence(evidence: Sequence[Evidence], knowledge: dict[str, Any], artifact_name: str) -> dict[str, Any]:
+    """Build the second-wave review context from first-wave evidence."""
+
     values = _all_values(evidence)
     external_models = [
         item.metadata.get("applies_to_model", "")
@@ -98,8 +121,9 @@ def _context_from_evidence(evidence: Sequence[Evidence], knowledge: dict[str, An
 
 
 def _source_score(items: Iterable[Evidence], knowledge: dict[str, Any]) -> int:
+    """Score independent sources once using the frozen knowledge weights."""
+
     weights = knowledge["source_weights"]
-    # Independent sources count once. Multiple parsers of one artifact do not manufacture confidence.
     strongest_by_source: dict[str, int] = {}
     for item in items:
         weight = int(weights.get(item.source_class, 0))
@@ -108,6 +132,8 @@ def _source_score(items: Iterable[Evidence], knowledge: dict[str, Any]) -> int:
 
 
 def _build_claims(evidence: Sequence[Evidence], knowledge: dict[str, Any]) -> list[Claim]:
+    """Build typed claims without allowing unobserved assertions to certify hardware."""
+
     claims: list[Claim] = []
     values = _all_values(evidence)
 
@@ -161,7 +187,7 @@ def _build_claims(evidence: Sequence[Evidence], knowledge: dict[str, Any]) -> li
     else:
         claims.append(Claim("transport.mode", None, Status.UNKNOWN, 0, missing_proof=("mode handshake",)))
 
-    model_values = []
+    model_values: list[str] = []
     for key in ("product.model", "product.device", "product.board", "apple.product_type"):
         model_values.extend(values.get(key, []))
     model_values = list(dict.fromkeys(model_values))
@@ -206,9 +232,13 @@ def _build_claims(evidence: Sequence[Evidence], knowledge: dict[str, Any]) -> li
         "hardware.cpu_signature",
         "hardware.gpu_signature",
     ]
-    direct_soc = [item for item in evidence if item.key in direct_soc_keys]
+    direct_soc = [item for item in evidence if item.key in direct_soc_keys and item.observed]
     soc_value = marketed_soc_evidence[0].value if marketed_soc_evidence else None
-    missing_soc = tuple(key for key in direct_soc_keys if not values.get(key))
+    missing_soc = tuple(
+        key
+        for key in direct_soc_keys
+        if not any(item.key == key and item.observed for item in evidence)
+    )
     contradictions: list[str] = []
     observed_model = _first_value(evidence, "product.model") or _first_value(evidence, "apple.product_type")
     for item in marketed_soc_evidence:
@@ -216,16 +246,21 @@ def _build_claims(evidence: Sequence[Evidence], knowledge: dict[str, Any]) -> li
         if applies and observed_model and applies.casefold() != observed_model.casefold():
             contradictions.append(f"Claim applies to {applies}; device reports {observed_model}")
     if direct_soc:
-        exact_value = _first_value(evidence, "hardware.exact_soc") or soc_value or _first_value(evidence, "hardware.silicon_id")
-        score = _source_score(direct_soc + marketed_soc_evidence, knowledge)
+        observed_exact = next(
+            (item.value for item in evidence if item.key == "hardware.exact_soc" and item.observed),
+            None,
+        )
+        exact_value = observed_exact or direct_soc[0].value
+        score = _source_score(direct_soc, knowledge)
         claims.append(
             Claim(
                 "hardware.exact_soc",
                 exact_value,
                 Status.CONFLICTED if contradictions else Status.CERTIFIED,
                 score,
-                tuple(sorted({item.key for item in direct_soc + marketed_soc_evidence})),
+                tuple(sorted({item.key for item in direct_soc})),
                 tuple(contradictions),
+                note="Certification is based only on observed device-side silicon evidence.",
             )
         )
     elif soc_value:
@@ -300,6 +335,8 @@ def _build_officers(
     claims: Sequence[Claim],
     private_results: Sequence[PrivateResult],
 ) -> list[OfficerReport]:
+    """Build permanent-officer reviews from claims and private results."""
+
     warnings = [warning for result in private_results for warning in result.warnings]
     errors = [error for result in private_results for error in result.errors]
     values = _all_values(evidence)
@@ -360,6 +397,8 @@ def _build_officers(
 
 
 def _governor_verdict(claims: Sequence[Claim], private_results: Sequence[PrivateResult]) -> dict[str, Any]:
+    """Issue the final read-only verdict from frozen policy states."""
+
     statuses = {claim.status for claim in claims}
     errors = [error for result in private_results for error in result.errors]
     if errors:
@@ -393,6 +432,8 @@ def inspect_text(
     external_claims: Sequence[Mapping[str, str]] | None = None,
     knowledge_path: str | Path | None = None,
 ) -> XrayReport:
+    """Inspect captured text through both SRG waves and permanent-officer review."""
+
     knowledge = load_knowledge(knowledge_path)
     wave1_context = {"wave": 1, "artifact_name": artifact_name, "knowledge": knowledge}
     wave1 = _run_wave(WAVE_ONE, text, wave1_context)

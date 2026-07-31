@@ -9,6 +9,8 @@ SCHEMA = "xray-report-v1"
 
 
 class Status(str, Enum):
+    """Evidence-state classifications emitted by Xray."""
+
     OBSERVED = "OBSERVED"
     CORROBORATED = "CORROBORATED"
     INFERRED = "INFERRED"
@@ -20,6 +22,8 @@ class Status(str, Enum):
 
 @dataclass(frozen=True)
 class Evidence:
+    """One provenance-preserving observation or external assertion."""
+
     key: str
     value: str
     source: str
@@ -32,6 +36,8 @@ class Evidence:
 
 @dataclass(frozen=True)
 class PrivateResult:
+    """Result returned by one governed SRG private worker."""
+
     private_id: str
     wave: int
     assignment: str
@@ -42,6 +48,8 @@ class PrivateResult:
 
 @dataclass(frozen=True)
 class Claim:
+    """Typed interpretation built from one or more evidence items."""
+
     name: str
     value: str | None
     status: Status
@@ -54,6 +62,8 @@ class Claim:
 
 @dataclass(frozen=True)
 class OfficerReport:
+    """Permanent-officer review output."""
+
     officer: str
     summary: str
     severity: str = "info"
@@ -64,6 +74,8 @@ class OfficerReport:
 
 @dataclass
 class XrayReport:
+    """Complete evidence, review, and Governor verdict envelope."""
+
     session_id: str
     created_at: str
     schema: str
@@ -77,6 +89,8 @@ class XrayReport:
     provider_expectations: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serializable report mapping."""
+
         result = asdict(self)
         for claim in result["claims"]:
             claim["status"] = claim["status"].value if isinstance(claim["status"], Status) else claim["status"]
@@ -84,4 +98,4 @@ class XrayReport:
 
 
 class KnowledgeError(RuntimeError):
-    pass
+    """Raised when the local Xray knowledge pack is malformed or unavailable."""

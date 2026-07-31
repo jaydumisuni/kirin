@@ -3,11 +3,14 @@ from __future__ import annotations
 import hashlib
 import re
 from typing import Any, Callable
+
 from .common import _ev, _extract_kv, _line_match
 from .models import Evidence, PrivateResult
 
 
 def _private_usb_fingerprint(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract USB VID/PID, endpoint, driver, and port evidence."""
+
     evidence: list[Evidence] = []
     for match in re.finditer(r"VID_([0-9A-Fa-f]{4})&PID_([0-9A-Fa-f]{4})", text):
         evidence.append(_ev("usb.vid", match.group(1).upper(), "private.usb-fingerprint", excerpt=match.group(0)))
@@ -23,6 +26,8 @@ def _private_usb_fingerprint(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_mode_detector(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Resolve direct and candidate device modes."""
+
     evidence: list[Evidence] = []
     for label in ("Port type", "MODE", "Mode"):
         found = _extract_kv(text, label)
@@ -45,6 +50,8 @@ def _private_mode_detector(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_android_identity(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract Android product, board, build, and filesystem identity."""
+
     mapping = {
         "Product Brand": "product.brand",
         "Product Manufacturer": "product.manufacturer",
@@ -72,6 +79,8 @@ def _private_android_identity(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_apple_identity(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract Apple recovery identifiers without Android assumptions."""
+
     mapping = {
         "CPID": "apple.cpid",
         "BDID": "apple.bdid",
@@ -93,6 +102,8 @@ def _private_apple_identity(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_huawei_rescue(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract Huawei rescue, OEMINFO, and bootloader readback."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     match = _line_match(r"rescue_phoneinfo\s*:\s*([^\r\n]+)", text)
@@ -121,6 +132,8 @@ def _private_huawei_rescue(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_unisoc_bootrom(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract UNISOC BootROM transport and loader compatibility evidence."""
+
     evidence: list[Evidence] = []
     for label, key, source_class in [
         ("Selected processor", "transport.loader_profile", "loader_compatibility"),
@@ -137,6 +150,8 @@ def _private_unisoc_bootrom(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_storage(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract storage type, filesystem, slot, and partition evidence."""
+
     evidence: list[Evidence] = []
     patterns = [
         (r"Flash Type\s*:\s*([^\r\n]+)", "storage.type"),
@@ -152,6 +167,8 @@ def _private_storage(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_security(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract security, bootloader, patch, and protected-read status."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     match = _line_match(r"Read IMEI\.\.\.\s*([^\r\n]+)", text)
@@ -170,6 +187,8 @@ def _private_security(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_versions(text: str, _: dict[str, Any]) -> PrivateResult:
+    """Extract generic Android, EMUI, iOS, and firmware version strings."""
+
     evidence: list[Evidence] = []
     patterns = [
         (r"\bAndroid\s+([0-9]+(?:\.[0-9]+)*)\b", "os.release"),
@@ -185,6 +204,8 @@ def _private_versions(text: str, _: dict[str, Any]) -> PrivateResult:
 
 
 def _private_artifact(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Hash and register the source artifact before interpretation."""
+
     encoded = text.encode("utf-8", errors="replace")
     evidence = (
         _ev("artifact.sha256", hashlib.sha256(encoded).hexdigest(), "private.artifact-custody", source_class="artifact_custody"),

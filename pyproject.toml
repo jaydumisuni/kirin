@@ -11,14 +11,21 @@ requires-python = ">=3.11"
 authors = [{name = "THETECHGUY DIGITAL SOLUTIONS"}]
 dependencies = []
 
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
 [project.scripts]
 xray = "xray.__main__:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+xray = ["data/base.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
