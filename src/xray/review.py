@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from typing import Any, Callable
+
 from .common import _ev
 from .models import Evidence, PrivateResult
 
 
 def _private_variant_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Reject silent transfer of claims across model/SKU variants."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     observed_model = context.get("observed_model")
@@ -19,6 +22,8 @@ def _private_variant_guard(text: str, context: dict[str, Any]) -> PrivateResult:
 
 
 def _private_loader_truth_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Prevent a successful loader profile from becoming silicon truth."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     loader = context.get("loader_profile")
@@ -29,6 +34,8 @@ def _private_loader_truth_guard(text: str, context: dict[str, Any]) -> PrivateRe
 
 
 def _private_main_version_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Block identity-dependent conclusions when Huawei main version is absent."""
+
     warnings: list[str] = []
     evidence: list[Evidence] = []
     if str(context.get("main_version", "")).upper() == "NO MAIN VERSION":
@@ -38,6 +45,8 @@ def _private_main_version_guard(text: str, context: dict[str, Any]) -> PrivateRe
 
 
 def _private_apple_mode_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Resolve Apple USB modes from the frozen VID/PID knowledge table."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     vid = str(context.get("usb_vid", "")).upper()
@@ -53,6 +62,8 @@ def _private_apple_mode_guard(text: str, context: dict[str, Any]) -> PrivateResu
 
 
 def _private_model_source_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Label model identity as device-side rather than externally transferred."""
+
     evidence: list[Evidence] = []
     model = context.get("observed_model")
     if model:
@@ -61,6 +72,8 @@ def _private_model_source_guard(text: str, context: dict[str, Any]) -> PrivateRe
 
 
 def _private_soc_proof_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Count direct SoC proof keys and report missing physical evidence."""
+
     evidence: list[Evidence] = []
     warnings: list[str] = []
     proof_keys = [
@@ -77,6 +90,8 @@ def _private_soc_proof_guard(text: str, context: dict[str, Any]) -> PrivateResul
 
 
 def _private_write_safety_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Freeze the first-run runtime at a read-only authority boundary."""
+
     evidence = (_ev("policy.write_authorized", "false", "private.write-safety-guard", observed=False),)
     return PrivateResult(
         "private-017",
@@ -88,6 +103,8 @@ def _private_write_safety_guard(text: str, context: dict[str, Any]) -> PrivateRe
 
 
 def _private_correlation_guard(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Assess whether enough identifiers exist to correlate one physical device."""
+
     evidence: list[Evidence] = []
     identifiers = [context.get("usb_vid"), context.get("usb_pid"), context.get("observed_model"), context.get("artifact_sha")]
     count = sum(1 for value in identifiers if value)
@@ -99,6 +116,8 @@ def _private_correlation_guard(text: str, context: dict[str, Any]) -> PrivateRes
 
 
 def _private_parser_consistency(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Cross-check direct and candidate mode parser outputs."""
+
     warnings: list[str] = []
     evidence: list[Evidence] = []
     modes = set(context.get("all_values", {}).get("transport.mode", [])) | set(context.get("all_values", {}).get("apple.usb_mode", []))
@@ -113,6 +132,8 @@ def _private_parser_consistency(text: str, context: dict[str, Any]) -> PrivateRe
 
 
 def _private_report_integrity(text: str, context: dict[str, Any]) -> PrivateResult:
+    """Verify mandatory artifact-custody fields are present."""
+
     evidence: list[Evidence] = []
     required = ["artifact.sha256", "artifact.bytes", "artifact.name"]
     missing = [key for key in required if not context.get("all_values", {}).get(key)]

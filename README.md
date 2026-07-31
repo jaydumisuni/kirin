@@ -12,7 +12,7 @@ Corps review, preserve evidence provenance and refuse unsupported conclusions.
 ## First run
 
 ```bash
-python -m pip install -e .
+python -m pip install -e ".[test]"
 xray doctor
 xray selftest
 xray inspect device-log.txt
@@ -86,12 +86,11 @@ xray knowledge-verify   Validate the local knowledge pack
 
 ## Repository map
 
-- `src/xray/` — usable Python evidence, corps and CLI runtime
-- `knowledge/base.json` — model-free rules and hardware/USB knowledge
+- `src/xray/` — usable Python evidence, corps and CLI runtime; packaged knowledge is in `src/xray/data/base.json`
+- `knowledge/base.json` — source-tree copy of model-free rules and hardware/USB knowledge
 - `rust/` — deterministic policy spine and authority-boundary tests
 - `tests/` — regression and proof tests
-- `docs/xray/first-run.md` — first-run design, limitations and proof record
-- `docs/xray/` — existing Huawei recovery evidence and handoff notes
+- `docs/xray/` — Huawei evidence, handoff notes, and `first-run.md` design/proof record
 
 Firmware binaries are not stored in this repository. Evidence is referenced by
 local path, package name, file size and hash where useful.

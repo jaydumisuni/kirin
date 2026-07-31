@@ -6,13 +6,15 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from .engine import _parse_external_claim, inspect_text
+from .engine import inspect_text, parse_external_claim
 from .knowledge import load_knowledge
 from .models import KnowledgeError, VERSION
-from .runtime import _report_text, doctor, run_selftest, scan_host
+from .runtime import doctor, report_text, run_selftest, scan_host
 
 
 def _write_output(payload: str, output: str | None) -> None:
+    """Write output to a file or stdout."""
+
     if output:
         Path(output).write_text(payload + ("\n" if not payload.endswith("\n") else ""), encoding="utf-8")
     else:
@@ -20,6 +22,8 @@ def _write_output(payload: str, output: str | None) -> None:
 
 
 def _parser() -> argparse.ArgumentParser:
+    """Build the Xray command-line parser."""
+
     parser = argparse.ArgumentParser(
         prog="xray",
         description="Model-independent, read-only device evidence and verification core.",
@@ -55,6 +59,8 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run the Xray CLI and return a process status code."""
+
     args = _parser().parse_args(argv)
     try:
         if args.command == "inspect":
@@ -65,9 +71,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 path = Path(args.path)
                 text = path.read_text(encoding="utf-8", errors="replace")
                 artifact_name = path.name
-            external_claims = [_parse_external_claim(raw) for raw in args.claim]
+            external_claims = [parse_external_claim(raw) for raw in args.claim]
             report = inspect_text(text, artifact_name=artifact_name, external_claims=external_claims)
-            payload = json.dumps(report.to_dict(), indent=2, sort_keys=True) if args.format == "json" else _report_text(report)
+            payload = json.dumps(report.to_dict(), indent=2, sort_keys=True) if args.format == "json" else report_text(report)
             _write_output(payload, args.output)
             return 0 if report.governor_verdict["result"] != "BLOCKED" else 2
 
@@ -82,13 +88,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 print(f"Knowledge: {payload['knowledge_schema']} {payload['knowledge_version']}")
                 for name, location in payload["commands"].items():
                     print(f"{name}: {location or 'not found'}")
-                print("Write authorized: NO")
+                print(f"Write authorized: {'YES' if payload['write_authorized'] else 'NO'}")
                 print("Model required: NO")
-            return 0
+            return 0 if not payload["write_authorized"] else 2
 
         if args.command == "scan":
             report = scan_host()
-            payload = json.dumps(report.to_dict(), indent=2, sort_keys=True) if args.format == "json" else _report_text(report)
+            payload = json.dumps(report.to_dict(), indent=2, sort_keys=True) if args.format == "json" else report_text(report)
             _write_output(payload, args.output)
             return 0 if report.governor_verdict["result"] != "BLOCKED" else 2
 
@@ -106,22 +112,23 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         if args.command == "knowledge-verify":
             knowledge = load_knowledge()
+            write_enabled = bool(knowledge["proof_policies"]["write_authorization"]["enabled"])
             result = {
-                "valid": True,
+                "valid": not write_enabled,
                 "schema": knowledge["schema"],
                 "version": knowledge["version"],
                 "rules": len(knowledge.get("rules", [])),
                 "usb_signatures": len(knowledge.get("usb_signatures", [])),
-                "write_authorized": knowledge["proof_policies"]["write_authorization"]["enabled"],
+                "write_authorized": write_enabled,
             }
             if args.format == "json":
                 print(json.dumps(result, indent=2, sort_keys=True))
             else:
-                print(f"PASS: {result['schema']} {result['version']}")
+                print(f"{'PASS' if result['valid'] else 'FAIL'}: {result['schema']} {result['version']}")
                 print(f"Rules: {result['rules']}")
                 print(f"USB signatures: {result['usb_signatures']}")
-                print("Write authorized: NO")
-            return 0
+                print(f"Write authorized: {'YES' if result['write_authorized'] else 'NO'}")
+            return 0 if result["valid"] else 2
     except (OSError, ValueError, KnowledgeError) as exc:
         print(f"xray: {exc}", file=sys.stderr)
         return 2

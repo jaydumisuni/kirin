@@ -64,7 +64,9 @@ PRODUCT: iPhone10,6
 """
 
 
-def _report_text(report: XrayReport) -> str:
+def report_text(report: XrayReport) -> str:
+    """Render a deterministic human-readable report."""
+
     lines = [
         f"Xray {report.xray_version} — {report.governor_verdict['result']}",
         f"Session: {report.session_id}",
@@ -102,13 +104,21 @@ def _report_text(report: XrayReport) -> str:
     return "\n".join(lines)
 
 
+_report_text = report_text
+
+
 def _safe_command(name: str, argv: Sequence[str], timeout: int = 12) -> dict[str, Any]:
+    """Run one fixed read-only provider command through its resolved executable."""
+
+    if not argv:
+        raise ValueError("Provider command cannot be empty")
     executable = shutil.which(argv[0])
     if not executable:
         return {"name": name, "available": False, "argv": list(argv), "returncode": None, "stdout": "", "stderr": "not found"}
+    resolved_argv = [executable, *argv[1:]]
     try:
         completed = subprocess.run(
-            list(argv),
+            resolved_argv,
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -118,7 +128,7 @@ def _safe_command(name: str, argv: Sequence[str], timeout: int = 12) -> dict[str
         return {
             "name": name,
             "available": True,
-            "argv": list(argv),
+            "argv": resolved_argv,
             "returncode": completed.returncode,
             "stdout": completed.stdout,
             "stderr": completed.stderr,
@@ -127,7 +137,7 @@ def _safe_command(name: str, argv: Sequence[str], timeout: int = 12) -> dict[str
         return {
             "name": name,
             "available": True,
-            "argv": list(argv),
+            "argv": resolved_argv,
             "returncode": None,
             "stdout": exc.stdout or "",
             "stderr": f"timeout after {timeout}s",
@@ -135,6 +145,8 @@ def _safe_command(name: str, argv: Sequence[str], timeout: int = 12) -> dict[str
 
 
 def doctor() -> dict[str, Any]:
+    """Report runtime, knowledge, provider, and authority readiness."""
+
     knowledge = load_knowledge()
     commands = ["adb", "fastboot", "idevice_id", "ideviceinfo", "irecovery", "lsusb", "system_profiler", "powershell"]
     return {
@@ -144,12 +156,18 @@ def doctor() -> dict[str, Any]:
         "knowledge_schema": knowledge["schema"],
         "knowledge_version": knowledge["version"],
         "commands": {command: shutil.which(command) for command in commands},
-        "write_authorized": False,
+        "write_authorized": bool(knowledge["proof_policies"]["write_authorization"]["enabled"]),
         "model_required": False,
     }
 
 
 def scan_host() -> XrayReport:
+    """Run available read-only host probes.
+
+    The `adb devices -l` probe can start the local adb server daemon. That is a
+    host-side process side effect; it remains read-only with respect to devices.
+    """
+
     system = platform.system().lower()
     probes: list[tuple[str, list[str]]] = [
         ("adb-list", ["adb", "devices", "-l"]),
@@ -184,14 +202,32 @@ def scan_host() -> XrayReport:
     return inspect_text("\n".join(joined), artifact_name="live-host-scan.txt")
 
 
-def _claim(report: XrayReport, name: str) -> Claim:
+def _claim(report: XrayReport, name: str) -> Claim | None:
+    """Return a claim by name without raising on parser regressions."""
+
     for item in report.claims:
         if item.name == name:
             return item
-    raise AssertionError(f"Missing claim: {name}")
+    return None
+
+
+def _claim_value(report: XrayReport, name: str) -> str | None:
+    """Return a claim value or None when absent."""
+
+    found = _claim(report, name)
+    return found.value if found else None
+
+
+def _claim_status(report: XrayReport, name: str) -> Status | None:
+    """Return a claim status or None when absent."""
+
+    found = _claim(report, name)
+    return found.status if found else None
 
 
 def run_selftest() -> dict[str, Any]:
+    """Run deterministic UNISOC, Huawei, and Apple proof cases."""
+
     tests: list[dict[str, Any]] = []
 
     unisoc = inspect_text(
@@ -210,11 +246,11 @@ def run_selftest() -> dict[str, Any]:
         {
             "name": "unisoc-loader-not-silicon",
             "passed": (
-                _claim(unisoc, "device.family").value == "UNISOC"
-                and _claim(unisoc, "transport.mode").value == "BROM"
-                and _claim(unisoc, "hardware.loader_compatibility").value == "Tiger_T616_64"
-                and _claim(unisoc, "hardware.exact_soc").status in {Status.CONFLICTED, Status.INFERRED}
-                and _claim(unisoc, "hardware.exact_soc").status != Status.CERTIFIED
+                _claim_value(unisoc, "device.family") == "UNISOC"
+                and _claim_value(unisoc, "transport.mode") == "BROM"
+                and _claim_value(unisoc, "hardware.loader_compatibility") == "Tiger_T616_64"
+                and _claim_status(unisoc, "hardware.exact_soc") in {Status.CONFLICTED, Status.INFERRED}
+                and _claim_status(unisoc, "hardware.exact_soc") != Status.CERTIFIED
             ),
             "verdict": unisoc.governor_verdict["result"],
         }
@@ -225,7 +261,7 @@ def run_selftest() -> dict[str, Any]:
         {
             "name": "huawei-main-version-gate",
             "passed": (
-                _claim(huawei, "firmware.main_version").status == Status.BLOCKED
+                _claim_status(huawei, "firmware.main_version") == Status.BLOCKED
                 and huawei.governor_verdict["result"] == "BLOCKED"
             ),
             "verdict": huawei.governor_verdict["result"],
@@ -237,9 +273,9 @@ def run_selftest() -> dict[str, Any]:
         {
             "name": "apple-dfu-readiness",
             "passed": (
-                _claim(apple, "device.family").value == "Apple"
-                and _claim(apple, "transport.mode").value == "DFU"
-                and _claim(apple, "apple.cpid").value == "0x8015"
+                _claim_value(apple, "device.family") == "Apple"
+                and _claim_value(apple, "transport.mode") == "DFU"
+                and _claim_value(apple, "apple.cpid") == "0x8015"
                 and "dfu" in apple.provider_expectations["apple"]
             ),
             "verdict": apple.governor_verdict["result"],
