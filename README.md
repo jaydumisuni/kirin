@@ -56,23 +56,48 @@ probe, but they cannot certify identity or authorize writes.
 
 ## Current safety boundary
 
-Xray 0.1 is deliberately read-only. It cannot authorize flashing, erase,
+Xray 0.2 is deliberately read-only. It cannot authorize flashing, erase,
 unlock, relock, formatting, identity repair or partition writes. Repair engines
 remain separate from the evidence authority.
 
+## Xray Live provider and session core
+
+The second milestone adds live host-side device perception without changing the
+read-only authority boundary:
+
+- cross-platform USB/PnP snapshot-diff watcher
+- stable physical-device session IDs across mode changes
+- persistent hashed-identifier correlation with guarded topology continuity
+- versioned provider interface and capability registry
+- ADB, Fastboot, Apple Recovery and Apple DFU providers
+- raw evidence envelopes with timestamps, topology and SHA-256 custody
+- append-only evidence journal with replay verification
+- dedicated SRG 10-for-2 live review corps
+- simulated Huawei P30 Pro and Apple Recovery/DFU verification
+
+```bash
+xray-live doctor
+xray-live providers
+xray-live simulate all
+xray-live watch --once
+```
+
+A provider-observed Apple ECID or protocol serial can merge a newly enumerated
+endpoint back into its earlier physical-device session. Reusing the same USB port
+with a different strong identity creates a new session rather than inheriting the
+old device history. Sensitive correlation anchors are hashed in the session
+registry; raw values remain only in declared evidence fields.
+
 ## Apple readiness
 
-The core already understands Apple USB family evidence, DFU/recovery mode
-signatures, CPID/BDID/ECID/product-type fields and expects future providers for:
+The core understands Apple USB family evidence, DFU/recovery mode signatures,
+CPID/BDID/ECID/product-type fields and includes live Recovery/DFU providers using
+`irecovery` query mode. The same report and officer structure is used for Apple
+and Android-family devices.
 
-- Apple USB
-- usbmux / MobileDevice
-- `ideviceinfo`
-- `irecovery`
-- DFU
-
-The same report and officer structure is used for Apple and Android-family
-devices. Apple-specific recovery depth can be added without redesigning Xray.
+Future Apple depth can add normal-mode usbmux/MobileDevice providers, SEP/baseband
+readback and richer board/product resolution without redesigning the session or
+evidence contracts.
 
 ## Commands
 
@@ -82,15 +107,23 @@ xray selftest           Run UNISOC, Huawei and Apple proof cases
 xray inspect FILE       Inspect a captured tool/device log
 xray scan               Run available read-only host discovery providers
 xray knowledge-verify   Validate the local knowledge pack
+
+xray-live doctor        Verify live providers and command availability
+xray-live providers     List provider manifests and capabilities
+xray-live simulate      Run P30 Pro and Apple simulated live proof
+xray-live watch         Watch USB/PnP events and write evidence reports
+xray-live journal-verify Verify an evidence JSONL journal
 ```
 
 ## Repository map
 
-- `src/xray/` — usable Python evidence, corps and CLI runtime; packaged knowledge is in `src/xray/data/base.json`
-- `knowledge/base.json` — source-tree copy of model-free rules and hardware/USB knowledge
+- `src/xray/` — Python evidence, corps, live session/provider and CLI runtimes
+- `src/xray/data/base.json` — packaged model-free rules and USB knowledge
+- `knowledge/base.json` — source-tree knowledge-pack copy
 - `rust/` — deterministic policy spine and authority-boundary tests
-- `tests/` — regression and proof tests
-- `docs/xray/` — Huawei evidence, handoff notes, and `first-run.md` design/proof record
+- `tests/` — regression, simulation and proof tests
+- `tools/review_live_core.py` — independent local SRG 10-for-2 reviewer
+- `docs/xray/` — Huawei evidence, handoffs and frozen milestone records
 
 Firmware binaries are not stored in this repository. Evidence is referenced by
 local path, package name, file size and hash where useful.
