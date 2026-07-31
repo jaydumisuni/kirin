@@ -9,6 +9,9 @@ from enum import Enum
 from typing import Any, Mapping, Sequence
 
 _HEX4 = re.compile(r"^[0-9A-F]{4}$")
+_ECID_PREFIXED_HEX = re.compile(r"^0[Xx][0-9A-Fa-f]{1,16}$")
+_ECID_DECIMAL = re.compile(r"^[0-9]{1,20}$")
+_ECID_BARE_HEX = re.compile(r"^[0-9A-Fa-f]{1,16}$")
 
 
 def utc_now() -> str:
@@ -39,6 +42,25 @@ def normalize_topology(value: str | None) -> str | None:
         return None
     collapsed = " ".join(value.strip().split())
     return collapsed.casefold() or None
+
+
+def normalize_ecid(value: str | None) -> str | None:
+    """Normalize decimal or hexadecimal Apple ECIDs to canonical 64-bit hex."""
+
+    if value is None or not value.strip():
+        return None
+    raw = value.strip()
+    if _ECID_PREFIXED_HEX.fullmatch(raw):
+        number = int(raw, 16)
+    elif _ECID_DECIMAL.fullmatch(raw):
+        number = int(raw, 10)
+    elif _ECID_BARE_HEX.fullmatch(raw):
+        number = int(raw, 16)
+    else:
+        raise ValueError(f"invalid Apple ECID: {value!r}")
+    if not 0 < number <= 0xFFFFFFFFFFFFFFFF:
+        raise ValueError(f"Apple ECID is outside the unsigned 64-bit range: {value!r}")
+    return f"0x{number:016X}"
 
 
 def canonical_sha256(payload: Mapping[str, Any] | Sequence[Any] | str | bytes) -> str:
@@ -99,7 +121,10 @@ class DeviceDescriptor:
         object.__setattr__(self, "topology_path", normalize_topology(self.topology_path))
         object.__setattr__(self, "mode", self.mode.strip().upper() if self.mode else None)
         object.__setattr__(self, "serial", self.serial.strip() if self.serial else None)
-        object.__setattr__(self, "metadata", dict(self.metadata))
+        metadata = dict(self.metadata)
+        if metadata.get("ecid"):
+            metadata["ecid"] = normalize_ecid(str(metadata["ecid"]))
+        object.__setattr__(self, "metadata", metadata)
         if not self.source.strip():
             raise ValueError("descriptor source is required")
         if not self.os_path.strip():
@@ -123,8 +148,6 @@ class DeviceDescriptor:
         """Return stable correlation anchors ordered from strongest to weakest."""
 
         anchors: list[str] = []
-        if self.topology_path:
-            anchors.append(f"topology:{self.topology_path}")
         for key in ("ecid", "udid", "container_id", "hardware_id", "adb_serial", "fastboot_serial"):
             value = self.metadata.get(key)
             if value and str(value).strip():
@@ -132,6 +155,8 @@ class DeviceDescriptor:
                 anchors.append(f"{key}-sha256:{digest}")
         if self.serial and self.serial.casefold() not in {"unknown", "none", "????????", "0123456789abcdef"}:
             anchors.append(f"serial-sha256:{canonical_sha256(self.serial.casefold())}")
+        if self.topology_path:
+            anchors.append(f"topology:{self.topology_path}")
         return tuple(dict.fromkeys(anchors))
 
     def to_dict(self) -> dict[str, Any]:
