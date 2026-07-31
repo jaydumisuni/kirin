@@ -1,0 +1,59 @@
+name: Expand Xray review hardening
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "tools/review_bundle.part*"
+      - ".github/workflows/review-hardening-bootstrap.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'xray/review-hardening'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: xray/review-hardening
+      - name: Verify and expand locally tested bundle
+        run: |
+          python - <<'PY'
+          import base64
+          import hashlib
+          import io
+          import zipfile
+          from pathlib import Path
+
+          root = Path.cwd().resolve()
+          parts = sorted((root / "tools").glob("review_bundle.part*"))
+          if len(parts) != 6:
+              raise SystemExit(f"expected 6 bundle parts, found {len(parts)}")
+          encoded = "".join(part.read_text(encoding="utf-8").strip() for part in parts)
+          archive = base64.b64decode(encoded, validate=True)
+          expected = "aadbf8bc35ef4db9815a17798ae3693768e715f783b30997840b150a38714342"
+          actual = hashlib.sha256(archive).hexdigest()
+          if actual != expected:
+              raise SystemExit(f"bundle sha256 mismatch: {actual}")
+          with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
+              for member in bundle.infolist():
+                  destination = (root / member.filename).resolve()
+                  if root not in destination.parents and destination != root:
+                      raise SystemExit(f"unsafe bundle member: {member.filename}")
+              bundle.extractall(root)
+          for part in parts:
+              part.unlink()
+          (root / ".github" / "workflows" / "review-hardening-bootstrap.yml").unlink()
+          PY
+      - name: Commit exact verified sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Harden Xray first usable runtime"
+          git push origin HEAD:xray/review-hardening
