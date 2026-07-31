@@ -71,7 +71,7 @@ read-only authority boundary:
 - versioned provider interface and capability registry
 - ADB, Fastboot, Apple Recovery and Apple DFU providers
 - raw evidence envelopes with timestamps, topology and SHA-256 custody
-- append-only evidence journal with replay verification
+- append-only evidence journal with replay self-consistency and corruption checks
 - dedicated SRG 10-for-2 live review corps
 - simulated Huawei P30 Pro and Apple Recovery/DFU verification
 
@@ -86,7 +86,11 @@ A provider-observed Apple ECID or protocol serial can merge a newly enumerated
 endpoint back into its earlier physical-device session. Reusing the same USB port
 with a different strong identity creates a new session rather than inheriting the
 old device history. Sensitive correlation anchors are hashed in the session
-registry; raw values remain only in declared evidence fields.
+registry. Persisted session summaries redact protocol identifiers and instance
+paths into SHA-256 references. Live event reports and raw evidence journals can
+still contain device identifiers, command arguments and protocol output; treat
+those files as sensitive and protect them with operating-system access controls
+or encrypted storage.
 
 ## Apple readiness
 
