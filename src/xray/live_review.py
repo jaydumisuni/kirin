@@ -3,6 +3,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Callable, Sequence
 
+from .providers import FORBIDDEN_CAPABILITY_TOKENS
 from .live_models import (
     DeviceEvent,
     EventKind,
@@ -56,7 +57,14 @@ def _provider_support(ctx: dict[str, Any]) -> LivePrivateResult:
     empty = [item.provider for item in results if item.supported and not item.envelopes and not item.errors]
     findings = [f"unsupported provider executed: {name}" for name in unsupported]
     findings.extend(f"provider returned no evidence: {name}" for name in empty)
-    return _private("private-006", 1, "Confirm selected providers support the endpoint", not findings, tuple(findings))
+    return _private(
+        "private-006",
+        1,
+        "Confirm selected providers support the endpoint",
+        not findings,
+        tuple(findings),
+        severity="warning" if findings else None,
+    )
 
 
 def _envelope_hashes(ctx: dict[str, Any]) -> LivePrivateResult:
@@ -85,7 +93,7 @@ def _write_boundary(ctx: dict[str, Any]) -> LivePrivateResult:
     forbidden = []
     for manifest in ctx["manifests"]:
         for capability in manifest.capabilities:
-            if any(token in capability.value for token in ("write", "flash", "erase", "unlock", "format", "repair")):
+            if any(token in capability.value for token in FORBIDDEN_CAPABILITY_TOKENS):
                 forbidden.append(f"{manifest.name}:{capability.value}")
     return _private("private-010", 1, "Enforce read-only authority boundary", not forbidden, tuple(forbidden))
 
@@ -286,7 +294,7 @@ def review_live_event(
             "summary": "Read-only boundary remains active; no flash, erase, unlock, relock, format, or identity write capability exists.",
         },
         "Analyst": {
-            "summary": f"SRG checks passed={sum(1 for item in privates if item.passed)}/20.",
+            "summary": f"SRG checks passed={sum(1 for item in privates if item.passed)}/{len(privates)}.",
         },
         "Challenger": {
             "summary": f"Raised {len(warnings) + len(provider_warnings)} warning(s) and {len(critical)} critical challenge(s).",
