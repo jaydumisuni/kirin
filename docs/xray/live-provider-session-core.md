@@ -105,9 +105,14 @@ claim in this milestone depends on having those devices connected during build.
 ## Apple multi-device selection
 
 The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
-provider observation has an ECID. Current libirecovery documents `-i/--ecid` as
-the specific-device selector and `-q/--query` as the read-only information query:
-https://github.com/libimobiledevice/libirecovery/blob/master/tools/irecovery.c
+provider observation has an ECID. The minimum compatible CLI contract is
+libirecovery 1.0.0: its official tagged source exposes `-i/--ecid` as the
+specific-device selector and `-q/--query` as the read-only information query:
+https://github.com/libimobiledevice/libirecovery/blob/1.0.0/tools/irecovery.c
+
+Binary presence alone does not prove compatibility. Deployment verification must
+confirm `irecovery -V` reports 1.0.0 or newer, or that `irecovery --help` exposes
+both required options before the Apple provider is treated as ready.
 
 When an ECID is not yet known, Xray may perform one unpinned query to recover it,
 but the Governor marks that report `CONFLICTED` because multiple simultaneous
