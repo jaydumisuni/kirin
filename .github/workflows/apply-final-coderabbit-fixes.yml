@@ -26,185 +26,184 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
-          def replace_once(path: str, old: str, new: str) -> None:
-              target = Path(path)
-              text = target.read_text(encoding="utf-8")
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
               count = text.count(old)
               if count != 1:
-                  raise SystemExit(f"{path}: expected one match, found {count}: {old!r}")
-              target.write_text(text.replace(old, new, 1), encoding="utf-8")
+                  raise SystemExit(f"{label}: expected one match, found {count}")
+              return text.replace(old, new, 1)
 
-          replace_once(
-              "src/xray/live_review.py",
+          live_path = Path("src/xray/live_review.py")
+          live = live_path.read_text(encoding="utf-8")
+          live = replace_once(
+              live,
               "token in capability.value for token in FORBIDDEN_CAPABILITY_TOKENS",
               "token in capability.value.casefold()\n                for token in FORBIDDEN_CAPABILITY_TOKENS",
+              "case-insensitive authority boundary",
           )
-          replace_once(
-              "src/xray/live_review.py",
+          live = replace_once(
+              live,
               'if key == "transport.mode" and result.provider.startswith("apple-")',
               'if key == "transport.mode"\n        and value\n        and result.provider.startswith("apple-")',
+              "Apple mode truthiness guard",
           )
-          replace_once(
-              "src/xray/live_review.py",
-              '''def _run_wave(
-              functions: Sequence[Check],
-              ctx: dict[str, Any],
-          ) -> list[LivePrivateResult]:'''.replace("          ", ""),
-              '''def _run_wave(
-              functions: Sequence[Check],
-              ctx: dict[str, Any],
-              wave_number: int,
-          ) -> list[LivePrivateResult]:'''.replace("          ", ""),
+          live, count = re.subn(
+              r"(def _run_wave\(\n    functions: Sequence\[Check\],\n    ctx: dict\[str, Any\],\n)(\) -> list\[LivePrivateResult\]:)",
+              r"\1    wave_number: int,\n\2",
+              live,
+              count=1,
           )
-          replace_once(
-              "src/xray/live_review.py",
-              '''            except Exception as exc:  # isolate one private from the rest of the corps
-                          wave = 1 if function_index(name, WAVE_ONE) is not None else 2
-                          results.append(
-                              _private(
-                                  f"failed:{name}",
-                                  wave,'''.replace("              ", ""),
-              '''            except Exception as exc:  # noqa: BLE001 - isolate one private from the corps
-                          results.append(
-                              _private(
-                                  f"failed:{name}",
-                                  wave_number,'''.replace("              ", ""),
+          if count != 1:
+              raise SystemExit("explicit wave-number signature: expected one match")
+          live = replace_once(
+              live,
+              "            except Exception as exc:  # isolate one private from the rest of the corps\n                wave = 1 if function_index(name, WAVE_ONE) is not None else 2",
+              "            except Exception as exc:  # noqa: BLE001 - isolate one private from the corps",
+              "wave exception isolation",
           )
-          replace_once(
-              "src/xray/live_review.py",
-              '''
-          def function_index(name: str, functions: Sequence[Check]) -> int | None:
-              """Return the position of a named private check, if present."""
-
-              for index, function in enumerate(functions):
-                  if function.__name__ == name:
-                      return index
-              return None
-
-          '''.replace("          ", ""),
-              "\n",
+          live = replace_once(
+              live,
+              '                        f"failed:{name}",\n                        wave,',
+              '                        f"failed:{name}",\n                        wave_number,',
+              "explicit failed-result wave",
           )
-          replace_once(
-              "src/xray/live_review.py",
+          live, count = re.subn(
+              r"\n\ndef function_index\(.*?\n    return None\n\n\ndef review_live_event",
+              "\n\ndef review_live_event",
+              live,
+              count=1,
+              flags=re.DOTALL,
+          )
+          if count != 1:
+              raise SystemExit("obsolete wave inference helper: expected one match")
+          live = replace_once(
+              live,
               "privates = tuple(_run_wave(WAVE_ONE, context) + _run_wave(WAVE_TWO, context))",
               "privates = tuple(\n        _run_wave(WAVE_ONE, context, 1) + _run_wave(WAVE_TWO, context, 2)\n    )",
+              "explicit wave calls",
           )
+          live_path.write_text(live, encoding="utf-8")
 
-          reviewer = Path("tools/review_live_core.py")
-          text = reviewer.read_text(encoding="utf-8")
+          reviewer_path = Path("tools/review_live_core.py")
+          reviewer = reviewer_path.read_text(encoding="utf-8")
           marker = '_SAFE_COMMAND = re.compile(r"^[A-Za-z0-9._+-]+$")\n'
           shell_calls = '''_SAFE_COMMAND = re.compile(r"^[A-Za-z0-9._+-]+$")
-          _SHELL_CALLS = {
-              ("os", "system"),
-              ("os", "popen"),
-              ("os", "spawnl"),
-              ("os", "spawnle"),
-              ("os", "spawnlp"),
-              ("os", "spawnlpe"),
-              ("os", "spawnv"),
-              ("os", "spawnve"),
-              ("os", "spawnvp"),
-              ("os", "spawnvpe"),
-              ("platform", "popen"),
-              ("subprocess", "getoutput"),
-              ("subprocess", "getstatusoutput"),
-          }
-          '''.replace("          ", "")
-          if text.count(marker) != 1:
-              raise SystemExit("reviewer: safe-command marker mismatch")
-          text = text.replace(marker, shell_calls, 1)
-          old_shell = 'if (node.func.value.id, node.func.attr) in {("os", "system"), ("os", "popen")}:'
-          if text.count(old_shell) != 1:
-              raise SystemExit("reviewer: shell-call predicate mismatch")
-          text = text.replace(
-              old_shell,
-              "if (node.func.value.id, node.func.attr) in _SHELL_CALLS:",
-              1,
+_SHELL_CALLS = {
+    ("os", "system"),
+    ("os", "popen"),
+    ("os", "spawnl"),
+    ("os", "spawnle"),
+    ("os", "spawnlp"),
+    ("os", "spawnlpe"),
+    ("os", "spawnv"),
+    ("os", "spawnve"),
+    ("os", "spawnvp"),
+    ("os", "spawnvpe"),
+    ("platform", "popen"),
+    ("subprocess", "getoutput"),
+    ("subprocess", "getstatusoutput"),
+}
+'''
+          reviewer = replace_once(
+              reviewer,
+              marker,
+              shell_calls,
+              "reviewer shell-call declarations",
           )
-          old_except = "    except Exception as exc:\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")"
-          new_except = "    except Exception as exc:  # noqa: BLE001 - a raising check must be auditable\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")"
-          if text.count(old_except) != 1:
-              raise SystemExit("reviewer: execute exception handler mismatch")
-          reviewer.write_text(text.replace(old_except, new_except, 1), encoding="utf-8")
+          reviewer = replace_once(
+              reviewer,
+              'if (node.func.value.id, node.func.attr) in {("os", "system"), ("os", "popen")}:',
+              "if (node.func.value.id, node.func.attr) in _SHELL_CALLS:",
+              "reviewer shell-call predicate",
+          )
+          reviewer = replace_once(
+              reviewer,
+              "    except Exception as exc:\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")",
+              "    except Exception as exc:  # noqa: BLE001 - a raising check must be auditable\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")",
+              "reviewer exception annotation",
+          )
+          reviewer_path.write_text(reviewer, encoding="utf-8")
 
-          docs = Path("docs/xray/live-provider-session-core.md")
-          text = docs.read_text(encoding="utf-8")
-          old_docs = '''The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
-          provider observation has an ECID. Current libirecovery documents `-i/--ecid` as
-          the specific-device selector and `-q/--query` as the read-only information query:
-          https://github.com/libimobiledevice/libirecovery/blob/master/tools/irecovery.c
-          '''.replace("          ", "")
-          new_docs = '''The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
-          provider observation has an ECID. The minimum compatible CLI contract is
-          libirecovery 1.0.0: its official tagged source exposes `-i/--ecid` as the
-          specific-device selector and `-q/--query` as the read-only information query:
-          https://github.com/libimobiledevice/libirecovery/blob/1.0.0/tools/irecovery.c
+          docs_path = Path("docs/xray/live-provider-session-core.md")
+          docs = docs_path.read_text(encoding="utf-8")
+          docs = replace_once(
+              docs,
+              """The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
+provider observation has an ECID. Current libirecovery documents `-i/--ecid` as
+the specific-device selector and `-q/--query` as the read-only information query:
+https://github.com/libimobiledevice/libirecovery/blob/master/tools/irecovery.c
+""",
+              """The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
+provider observation has an ECID. The minimum compatible CLI contract is
+libirecovery 1.0.0: its official tagged source exposes `-i/--ecid` as the
+specific-device selector and `-q/--query` as the read-only information query:
+https://github.com/libimobiledevice/libirecovery/blob/1.0.0/tools/irecovery.c
 
-          Binary presence alone does not prove compatibility. Deployment verification must
-          confirm `irecovery -V` reports 1.0.0 or newer, or that `irecovery --help` exposes
-          both required options before the Apple provider is treated as ready.
-          '''.replace("          ", "")
-          if text.count(old_docs) != 1:
-              raise SystemExit("docs: libirecovery contract mismatch")
-          docs.write_text(text.replace(old_docs, new_docs, 1), encoding="utf-8")
+Binary presence alone does not prove compatibility. Deployment verification must
+confirm `irecovery -V` reports 1.0.0 or newer, or that `irecovery --help` exposes
+both required options before the Apple provider is treated as ready.
+""",
+              "documented libirecovery contract",
+          )
+          docs_path.write_text(docs, encoding="utf-8")
 
-          tests = Path("tests/test_live_core.py")
-          text = tests.read_text(encoding="utf-8")
+          tests_path = Path("tests/test_live_core.py")
+          tests = tests_path.read_text(encoding="utf-8")
           additions = '''
 
-          def test_apple_pid_mode_ignores_empty_transport_observation():
-              from xray.live_models import ProviderProbeResult
-              from xray.live_review import _apple_pid_mode
 
-              event = apple_events()[0]
-              result = _apple_pid_mode(
-                  {
-                      "event": event,
-                      "providers": (
-                          ProviderProbeResult(
-                              "apple-recovery",
-                              True,
-                              observations={"transport.mode": ""},
-                          ),
-                      ),
-                  }
-              )
-              assert result.passed
+def test_apple_pid_mode_ignores_empty_transport_observation():
+    from xray.live_models import ProviderProbeResult
+    from xray.live_review import _apple_pid_mode
 
-
-          def test_write_boundary_casefolds_forbidden_capabilities():
-              from types import SimpleNamespace
-
-              from xray.live_review import _write_boundary
-
-              result = _write_boundary(
-                  {
-                      "manifests": (
-                          SimpleNamespace(
-                              name="mixed-case",
-                              capabilities=(SimpleNamespace(value="FlashDevice"),),
-                          ),
-                      )
-                  }
-              )
-              assert not result.passed
+    event = apple_events()[0]
+    result = _apple_pid_mode(
+        {
+            "event": event,
+            "providers": (
+                ProviderProbeResult(
+                    "apple-recovery",
+                    True,
+                    observations={"transport.mode": ""},
+                ),
+            ),
+        }
+    )
+    assert result.passed
 
 
-          def test_run_wave_uses_explicit_wave_number_for_failures():
-              from xray.live_review import _run_wave
+def test_write_boundary_casefolds_forbidden_capabilities():
+    from types import SimpleNamespace
 
-              def broken(_context):
-                  raise RuntimeError("expected reviewer failure")
+    from xray.live_review import _write_boundary
 
-              result = _run_wave((broken,), {}, 2)
-              assert len(result) == 1
-              assert result[0].wave == 2
-              assert not result[0].passed
-          '''.replace("          ", "")
-          marker = "def test_run_wave_uses_explicit_wave_number_for_failures():"
-          if marker not in text:
-              tests.write_text(text.rstrip() + additions + "\n", encoding="utf-8")
+    result = _write_boundary(
+        {
+            "manifests": (
+                SimpleNamespace(
+                    name="mixed-case",
+                    capabilities=(SimpleNamespace(value="FlashDevice"),),
+                ),
+            )
+        }
+    )
+    assert not result.passed
+
+
+def test_run_wave_uses_explicit_wave_number_for_failures():
+    from xray.live_review import _run_wave
+
+    def broken(_context):
+        raise RuntimeError("expected reviewer failure")
+
+    result = _run_wave((broken,), {}, 2)
+    assert len(result) == 1
+    assert result[0].wave == 2
+    assert not result[0].passed
+'''
+          if "def test_run_wave_uses_explicit_wave_number_for_failures():" not in tests:
+              tests_path.write_text(tests.rstrip() + additions + "\n", encoding="utf-8")
           PY
       - name: Prove final review corrections
         run: |
