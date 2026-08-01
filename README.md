@@ -38,7 +38,7 @@ explicit evidence state.
 
 ## SRG operating structure
 
-The runtime uses the SRG **10-for-2** force method: two governed waves of ten
+The runtime uses the SRG **20-for-2** force method: two governed waves of twenty
 private workers. Permanent officers then review the combined evidence:
 
 - Scout — discovery and mode detection
@@ -72,7 +72,7 @@ read-only authority boundary:
 - ADB, Fastboot, Apple Recovery and Apple DFU providers
 - raw evidence envelopes with timestamps, topology and SHA-256 custody
 - append-only evidence journal with replay self-consistency and corruption checks
-- dedicated SRG 10-for-2 live review corps
+- dedicated SRG 20-for-2 live review corps
 - simulated Huawei P30 Pro and Apple Recovery/DFU verification
 
 ```bash
@@ -86,7 +86,11 @@ A provider-observed Apple ECID or protocol serial can merge a newly enumerated
 endpoint back into its earlier physical-device session. Reusing the same USB port
 with a different strong identity creates a new session rather than inheriting the
 old device history. Sensitive correlation anchors are hashed in the session
-registry. Persisted session summaries redact protocol identifiers and instance paths into SHA-256 references. Live event reports and raw evidence journals can still contain device identifiers, command arguments and protocol output; treat those files as sensitive and protect them with operating-system access controls or encrypted storage.
+registry. Persisted session summaries redact protocol identifiers and instance
+paths into SHA-256 references. Live event reports and raw evidence journals can
+still contain device identifiers, command arguments and protocol output; treat
+those files as sensitive and protect them with operating-system access controls
+or encrypted storage.
 
 ## Apple readiness
 
@@ -122,7 +126,7 @@ xray-live journal-verify Verify an evidence JSONL journal
 - `knowledge/base.json` — source-tree knowledge-pack copy
 - `rust/` — deterministic policy spine and authority-boundary tests
 - `tests/` — regression, simulation and proof tests
-- `tools/review_live_core.py` — independent local SRG 10-for-2 reviewer
+- `tools/review_live_core.py` — independent local SRG 20-for-2 reviewer
 - `docs/xray/` — Huawei evidence, handoffs and frozen milestone records
 
 Firmware binaries are not stored in this repository. Evidence is referenced by
