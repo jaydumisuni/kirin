@@ -80,6 +80,14 @@ The simulation transitions one physical port from Recovery (`05AC:1281`) to DFU
 (`05AC:1227`) with the same ECID. Xray retains one physical session and verifies
 CPID, BDID, ECID, product type and mode through Apple provider envelopes.
 
+## Continuous proof matrix
+
+The final workflow proves the branch through four Python package configurations:
+Python 3.11 and 3.13, each installed in editable and standard-wheel modes. A
+separate live-review job runs the independent SRG 20-for-2 reviewer and complete
+P30 Pro/Apple simulation, while the Rust job enforces formatting, Clippy warnings
+as errors, tests and the deterministic policy executable.
+
 ## Local proof commands
 
 ```bash
