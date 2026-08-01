@@ -682,7 +682,7 @@ class _AppleRecoveryBase(DeviceProvider):
         descriptor: DeviceDescriptor,
         runner: Any,
     ) -> ProviderProbeResult:
-        """Query one Apple Recovery/DFU endpoint without issuing commands."""
+        """Query one Apple Recovery/DFU endpoint through a single read-only irecovery command."""
 
         ecid = _validate_ecid(str(descriptor.metadata.get("ecid") or ""))
         argv = ("irecovery", "-i", ecid, "-q") if ecid else ("irecovery", "-q")
