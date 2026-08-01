@@ -12,7 +12,14 @@ def main() -> int:
         raise SystemExit(f"expected 5 promotion parts, found {len(parts)}")
     encoded = "".join(part.read_text(encoding="ascii").strip() for part in parts)
     source = base64.b64decode(encoded, validate=True)
-    exec(compile(source, "<xray-srg-20-for-2-promotion>", "exec"), {"__name__": "__main__"})
+    try:
+        exec(
+            compile(source, "<xray-srg-20-for-2-promotion>", "exec"),
+            {"__name__": "__main__"},
+        )
+    except SystemExit as exc:
+        if exc.code not in (None, 0):
+            raise
     for part in parts:
         part.unlink()
     Path("tools/promote20.trigger").unlink(missing_ok=True)
