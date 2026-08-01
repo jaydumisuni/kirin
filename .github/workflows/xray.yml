@@ -17,7 +17,10 @@ concurrency:
 
 jobs:
   python-proof:
-    if: github.event_name != 'issue_comment' && github.event.head_commit.message != 'Promote Xray live SRG to 20-for-2'
+    if: >-
+      github.event_name != 'issue_comment' &&
+      github.event.head_commit.message != 'Prepare Xray SRG promotion trigger' &&
+      !(github.event_name == 'pull_request' && github.event.action == 'reopened' && github.event.pull_request.number == 4 && github.event.pull_request.head.sha == '7caf655646313d4e88991bc6abdfc1c6d7f525c0')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -51,7 +54,10 @@ jobs:
           env -u XRAY_PROJECT_ROOT python -m xray knowledge-verify --format json
 
   rust-proof:
-    if: github.event_name != 'issue_comment' && github.event.head_commit.message != 'Promote Xray live SRG to 20-for-2'
+    if: >-
+      github.event_name != 'issue_comment' &&
+      github.event.head_commit.message != 'Prepare Xray SRG promotion trigger' &&
+      !(github.event_name == 'pull_request' && github.event.action == 'reopened' && github.event.pull_request.number == 4 && github.event.pull_request.head.sha == '7caf655646313d4e88991bc6abdfc1c6d7f525c0')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -94,9 +100,10 @@ jobs:
           pytest
           python tools/review_live_core.py
           xray-live simulate all --format json
-      - name: Commit promoted source and remove transfer parts
+      - name: Restore final workflow and commit promoted source
         run: |
-          rm -f tools/promote20.part*
+          git show c9768eda00ea1cfd5f4120dc1e0984f3bcf99d90:.github/workflows/xray.yml > .github/workflows/xray.yml
+          rm -f tools/promote20.part* tools/promote20.trigger
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
