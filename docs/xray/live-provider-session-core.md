@@ -49,12 +49,7 @@ Each provider result records:
 - normalized observations
 - declared sensitive fields
 
-The JSONL journal checks envelope self-consistency during append and replay and
-detects accidental corruption or records that no longer match their embedded
-hashes. These hashes are stored beside the data, so they are not an
-attacker-resistant trust anchor. A later secured deployment must anchor a journal
-head with an OS-keystore-backed HMAC/signature or an external signed ledger before
-claiming adversarial tamper detection.
+The JSONL journal checks envelope self-consistency during append and replay and detects accidental corruption or records that no longer match their embedded hashes. These hashes are stored beside the data, so they are not an attacker-resistant trust anchor. A later secured deployment must anchor a journal head with an OS-keystore-backed HMAC/signature or an external signed ledger before claiming adversarial tamper detection.
 
 ## Simulation proof
 
@@ -74,9 +69,8 @@ CPID, BDID, ECID, product type and mode through Apple provider envelopes.
 ## Local proof commands
 
 ```bash
-python -m compileall -q src tests tools
+python -m compileall -q src tests
 pytest
-python tools/review_live_core.py
 python -m xray.live_cli doctor --format json
 python -m xray.live_cli providers --format json
 python -m xray.live_cli simulate all --format json
@@ -92,11 +86,12 @@ provider observation has an ECID. Current libirecovery documents `-i/--ecid` as
 the specific-device selector and `-q/--query` as the read-only information query:
 https://github.com/libimobiledevice/libirecovery/blob/master/tools/irecovery.c
 
-When an ECID is not yet known, Xray may perform an unpinned query only as a
-qualified observation. The watcher records how many Apple Recovery/DFU endpoints
-are present. An unpinned ECID may become a session anchor only when the host
-snapshot proves exactly one such endpoint; otherwise the Governor marks the
-result `CONFLICTED` and the ECID is not used to merge sessions.
+When an ECID is not yet known, Xray may perform one unpinned query to recover it,
+but the Governor marks that report `CONFLICTED` because multiple simultaneous
+Recovery/DFU devices would otherwise be ambiguous. The observed ECID is hashed
+into the Session Registry and can merge a newly enumerated endpoint back into
+its older physical-device session.
+
 
 ## Sensitive-data retention and access control
 

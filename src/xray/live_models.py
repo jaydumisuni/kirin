@@ -44,6 +44,7 @@ def normalize_topology(value: str | None) -> str | None:
     return collapsed.casefold() or None
 
 
+
 def normalize_ecid(value: str | None) -> str | None:
     """Normalize decimal or hexadecimal Apple ECIDs to canonical 64-bit hex."""
 

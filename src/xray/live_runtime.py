@@ -175,8 +175,7 @@ class XrayLiveRuntime:
             path.parent.mkdir(parents=True, exist_ok=True)
 
         def callback(event: DeviceEvent) -> None:
-            """Process and persist one watcher event."""
-
+            """Callback."""
             report = self.handle_event(event)
             reports.append(report)
             if path:

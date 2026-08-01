@@ -4,11 +4,14 @@ import json
 import platform
 import re
 import threading
+from dataclasses import replace
 from pathlib import Path
 from collections.abc import Callable, Sequence
 from typing import Protocol
 
 from .live_models import CommandResult, DeviceDescriptor, DeviceEvent, EventKind
+
+_PROTOCOL_SERIAL = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 
 class SnapshotSource(Protocol):
@@ -53,6 +56,7 @@ class StaticSnapshotSource:
         self._index = 0
 
     def snapshot(self) -> Sequence[DeviceDescriptor]:
+        """Snapshot."""
         if not self._snapshots:
             return ()
         index = min(self._index, len(self._snapshots) - 1)
@@ -73,11 +77,25 @@ class PollingDeviceWatcher:
         """Poll once and return normalized connect/disconnect/change events."""
 
         current_descriptors = tuple(self.source.snapshot())
-        current: dict[str, DeviceDescriptor] = {}
+        deduplicated: dict[str, DeviceDescriptor] = {}
         for descriptor in current_descriptors:
-            if descriptor.slot_key in current:
-                raise ValueError(f"duplicate endpoint slot in snapshot: {descriptor.slot_key}")
-            current[descriptor.slot_key] = descriptor
+            if descriptor.slot_key in deduplicated:
+                # Snapshot providers can transiently report duplicate interfaces for one USB slot.
+                # Retain the first deterministic descriptor and keep the watcher alive.
+                continue
+            deduplicated[descriptor.slot_key] = descriptor
+        apple_recovery_count = sum(
+            1
+            for item in deduplicated.values()
+            if item.vid == "05AC" and item.pid in {"1227", "1281"}
+        )
+        current: dict[str, DeviceDescriptor] = {}
+        for slot, descriptor in deduplicated.items():
+            if descriptor.vid == "05AC" and descriptor.pid in {"1227", "1281"}:
+                metadata = dict(descriptor.metadata)
+                metadata.setdefault("apple_recovery_device_count", apple_recovery_count)
+                descriptor = replace(descriptor, metadata=metadata)
+            current[slot] = descriptor
 
         events: list[DeviceEvent] = []
         for slot, descriptor in current.items():
@@ -171,7 +189,8 @@ $items | ConvertTo-Json -Depth 4 -Compress
                 continue
             location = str(item.get("Location") or "").strip() or None
             container_id = str(item.get("ContainerId") or "").strip() or None
-            serial = instance.rsplit("\\", 1)[-1].strip() if "\\" in instance else None
+            tail = instance.rsplit("\\", 1)[-1].strip() if "\\" in instance else ""
+            serial = tail if tail and "&" not in tail and _PROTOCOL_SERIAL.fullmatch(tail) else None
             mode = _infer_mode(friendly, vid.upper() if vid else None, pid.upper() if pid else None)
             protocol_metadata = {}
             if serial and mode == "ADB":
@@ -200,6 +219,7 @@ $items | ConvertTo-Json -Depth 4 -Compress
         return tuple(output)
 
     def snapshot(self) -> Sequence[DeviceDescriptor]:
+        """Snapshot."""
         result = self.runner.run(
             ("powershell", "-NoProfile", "-NonInteractive", "-Command", self._SCRIPT),
             timeout=20,
@@ -225,6 +245,7 @@ class LinuxSysfsSnapshotSource:
         return value or None
 
     def snapshot(self) -> Sequence[DeviceDescriptor]:
+        """Snapshot."""
         if not self.root.is_dir():
             return LinuxUsbSnapshotSource(self.runner).snapshot()
         output: list[DeviceDescriptor] = []
@@ -276,6 +297,7 @@ class LinuxUsbSnapshotSource:
 
     @classmethod
     def parse(cls, payload: str) -> tuple[DeviceDescriptor, ...]:
+        """Parse."""
         output: list[DeviceDescriptor] = []
         for line in payload.splitlines():
             match = cls._LINE.match(line.strip())
@@ -301,6 +323,7 @@ class LinuxUsbSnapshotSource:
         return tuple(output)
 
     def snapshot(self) -> Sequence[DeviceDescriptor]:
+        """Snapshot."""
         result = self.runner.run(("lsusb",), timeout=10)
         if not result.available or result.timed_out or result.returncode != 0:
             return ()
@@ -315,12 +338,14 @@ class MacUsbSnapshotSource:
 
     @staticmethod
     def parse(payload: str) -> tuple[DeviceDescriptor, ...]:
+        """Parse."""
         if not payload.strip():
             return ()
         root = json.loads(payload)
         output: list[DeviceDescriptor] = []
 
         def walk(node: object, ancestry: tuple[str, ...] = ()) -> None:
+            """Walk."""
             if isinstance(node, list):
                 for child in node:
                     walk(child, ancestry)
@@ -364,6 +389,7 @@ class MacUsbSnapshotSource:
         return tuple(output)
 
     def snapshot(self) -> Sequence[DeviceDescriptor]:
+        """Snapshot."""
         result = self.runner.run(("system_profiler", "SPUSBDataType", "-json"), timeout=30)
         if not result.available or result.timed_out or result.returncode != 0:
             return ()

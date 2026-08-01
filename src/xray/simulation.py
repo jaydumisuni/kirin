@@ -160,3 +160,27 @@ def run_simulation(scenario: str = "all") -> dict[str, Any]:
             "write_authorized": False,
             "model_required": False,
         }
+
+
+def validate_simulation(payload: dict[str, Any], scenario: str) -> tuple[str, ...]:
+    """Return deterministic invariant failures for a simulation payload."""
+
+    from .live_review import WAVE_ONE, WAVE_TWO
+
+    failures: list[str] = []
+    journal = payload.get("journal") or {}
+    reports = payload.get("reports") or []
+    expected_privates = len(WAVE_ONE) + len(WAVE_TWO)
+    results = [report.get("review", {}).get("governor", {}).get("result") for report in reports]
+    expected_blocked = 1 if scenario in {"p30", "all"} else 0
+    if journal.get("valid") is not True:
+        failures.append("journal verification failed")
+    if not all(len(report.get("review", {}).get("privates", ())) == expected_privates for report in reports):
+        failures.append(f"unexpected private-review count; expected {expected_privates}")
+    if results.count("BLOCKED") != expected_blocked:
+        failures.append(f"expected {expected_blocked} BLOCKED verdict(s), got {results.count('BLOCKED')}")
+    allowed = {"LIVE_READ_ONLY_READY", "CONFLICTED", "BLOCKED"}
+    unknown = [result for result in results if result not in allowed]
+    if unknown:
+        failures.append(f"unknown governor verdict(s): {unknown}")
+    return tuple(failures)

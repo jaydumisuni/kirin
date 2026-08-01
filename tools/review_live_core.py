@@ -5,6 +5,7 @@ import importlib
 import json
 import pathlib
 import sys
+from functools import lru_cache
 from dataclasses import dataclass
 from typing import Callable
 
@@ -15,7 +16,7 @@ if str(SRC) not in sys.path:
 
 from xray.live_models import DeviceEvent, EventKind  # noqa: E402
 from xray.live_runtime import XrayLiveRuntime  # noqa: E402
-from xray.providers import AdbProvider, SimulatedRunner, default_registry  # noqa: E402
+from xray.providers import AdbProvider, FORBIDDEN_CAPABILITY_TOKENS, SimulatedRunner, default_registry  # noqa: E402
 from xray.sessions import SessionRegistry  # noqa: E402
 from xray.simulation import apple_events, p30_events, run_simulation  # noqa: E402
 from xray.watcher import PollingDeviceWatcher, StaticSnapshotSource  # noqa: E402
@@ -42,12 +43,13 @@ def _python_sources() -> list[pathlib.Path]:
 
 
 def check_compile() -> CheckResult:
+    sources = _python_sources()
     try:
-        for path in _python_sources():
+        for path in sources:
             compile(path.read_text(encoding="utf-8"), str(path), "exec")
     except SyntaxError as exc:
         return _result("compile", False, str(exc))
-    return _result("compile", True, f"compiled {len(_python_sources())} module(s)")
+    return _result("compile", True, f"compiled {len(sources)} module(s)")
 
 
 def check_imports() -> CheckResult:
@@ -82,7 +84,7 @@ def check_forbidden_capabilities() -> CheckResult:
     forbidden = []
     for manifest in default_registry().manifests():
         for capability in manifest.capabilities:
-            if any(token in capability.value for token in ("write", "flash", "erase", "unlock", "format", "repair")):
+            if any(token in capability.value for token in FORBIDDEN_CAPABILITY_TOKENS):
                 forbidden.append(f"{manifest.name}:{capability.value}")
     return _result("forbidden-capabilities", not forbidden, f"forbidden={forbidden}")
 
@@ -100,7 +102,7 @@ def check_no_shell_execution() -> CheckResult:
                     name = node.func.id
                 if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
                     owner = node.func.value.id
-                    if (owner, name) in {("os", "system"), ("os", "popen")}:
+                    if (owner, name) in {("os", "system"), ("os", "popen")} :
                         violations.append(f"{path.name}:{node.lineno}:{owner}.{name}")
                 for keyword in node.keywords:
                     if keyword.arg == "shell" and isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
@@ -112,8 +114,13 @@ def check_public_docstrings() -> CheckResult:
     missing: list[str] = []
     for path in _python_sources():
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in tree.body:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and not node.name.startswith("_"):
+        parents = [tree, *(node for node in tree.body if isinstance(node, ast.ClassDef))]
+        for parent in parents:
+            for node in parent.body:
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    continue
+                if node.name.startswith("_"):
+                    continue
                 if not ast.get_docstring(node):
                     missing.append(f"{path.name}:{node.lineno}:{node.name}")
     return _result("public-docstrings", not missing, f"missing={missing}")
@@ -159,6 +166,7 @@ def check_watcher_transition() -> CheckResult:
     return _result("watcher-transition", passed, f"events={[item.kind.value for item in (*initial, *transition)]}")
 
 
+@lru_cache(maxsize=1)
 def _simulation() -> dict:
     return run_simulation("all")
 
@@ -220,16 +228,17 @@ def check_write_boundary() -> CheckResult:
 def check_unsafe_serial_rejected() -> CheckResult:
     event = p30_events()[0]
     bad = event.descriptor.__class__(**{**event.descriptor.to_dict(), "serial": "bad;rm", "metadata": {"adb_serial": "bad;rm"}, "mode": "ADB"})
-    try:
-        AdbProvider().probe("xray-device-12345678901234567890", bad, SimulatedRunner({}))
-    except ValueError:
-        return _result("unsafe-serial", True, "rejected")
-    return _result("unsafe-serial", False, "unsafe serial accepted")
+    result = AdbProvider().probe("xray-device-12345678901234567890", bad, SimulatedRunner({}))
+    passed = result.supported is False and bool(result.warnings)
+    return _result("unsafe-serial", passed, f"supported={result.supported}, warnings={list(result.warnings)}")
 
 
 def check_provider_exception_isolation() -> CheckResult:
+    from xray.live_models import Capability, ProviderManifest
+    from xray.providers import ProviderRegistry, UsbDescriptorProvider
+
     class BrokenProvider:
-        manifest = next(item for item in default_registry().manifests() if item.name == "usb-descriptor")
+        manifest = ProviderManifest("review-broken", "1", ("usb",), (Capability.READ_IDENTITY,))
 
         def supports(self, descriptor):
             return True
@@ -237,13 +246,7 @@ def check_provider_exception_isolation() -> CheckResult:
         def probe(self, session_id, descriptor, runner):
             raise RuntimeError("review injection")
 
-    from xray.providers import ProviderRegistry, UsbDescriptorProvider
-
     registry = ProviderRegistry((UsbDescriptorProvider(),))
-    # Duplicate manifest name would be rejected, so use the runtime's own exception boundary with a unique manifest.
-    from xray.live_models import Capability, ProviderManifest
-
-    BrokenProvider.manifest = ProviderManifest("review-broken", "1", ("usb",), (Capability.READ_IDENTITY,))
     registry.register(BrokenProvider())
     runtime = XrayLiveRuntime(registry=registry, sessions=SessionRegistry(host_scope="review"), runner=SimulatedRunner({}))
     report = runtime.handle_event(DeviceEvent(EventKind.CONNECTED, p30_events()[0].descriptor))
@@ -278,12 +281,21 @@ WAVE_TWO: tuple[Check, ...] = (
 )
 
 
+def _execute_check(check: Check) -> CheckResult:
+    """Convert an individual reviewer exception into an auditable failed result."""
+
+    try:
+        return check()
+    except Exception as exc:
+        return _result(check.__name__, False, f"{type(exc).__name__}: {exc}")
+
+
 def main() -> int:
     """Run the independent local SRG 10-for-2 reviewer."""
 
     waves = []
     for wave_number, checks in enumerate((WAVE_ONE, WAVE_TWO), start=1):
-        results = [check() for check in checks]
+        results = [_execute_check(check) for check in checks]
         waves.append({"wave": wave_number, "results": [result.__dict__ for result in results]})
     passed = all(item["passed"] for wave in waves for item in wave["results"])
     payload = {

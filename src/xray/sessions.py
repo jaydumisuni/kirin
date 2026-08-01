@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import platform
+from contextlib import contextmanager
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -51,8 +52,24 @@ class SessionRecord:
             self.topology_paths.add(descriptor.topology_path)
         if descriptor.mode and (not self.modes or self.modes[-1] != descriptor.mode):
             self.modes.append(descriptor.mode)
-        self.last_descriptor = descriptor.to_dict()
-        if self.stability == "weak" and (descriptor.topology_path or len(descriptor.identity_anchors()) > 0):
+        descriptor_payload = descriptor.to_dict()
+        raw_os_path = descriptor_payload.get("os_path")
+        if raw_os_path:
+            descriptor_payload["os_path_sha256"] = canonical_sha256(str(raw_os_path).casefold())
+            descriptor_payload["os_path"] = None
+        raw_serial = descriptor_payload.get("serial")
+        if raw_serial:
+            descriptor_payload["serial_sha256"] = canonical_sha256(str(raw_serial).casefold())
+            descriptor_payload["serial"] = None
+        metadata = dict(descriptor_payload.get("metadata") or {})
+        for key in ("ecid", "udid", "container_id", "hardware_id", "adb_serial", "fastboot_serial"):
+            value = metadata.pop(key, None)
+            if value:
+                metadata[f"{key}_sha256"] = canonical_sha256(str(value).casefold())
+        descriptor_payload["metadata"] = metadata
+        self.last_descriptor = descriptor_payload
+        strong = [anchor for anchor in descriptor.identity_anchors() if not anchor.startswith("topology:")]
+        if self.stability == "weak" and strong:
             self.stability = "stable"
 
     def mark_event(self, kind: EventKind, observed_at: str) -> None:
@@ -120,6 +137,8 @@ class SessionRegistry:
         self._sessions: dict[str, SessionRecord] = {}
         self._anchor_to_session: dict[str, str] = {}
         self._lock = threading.RLock()
+        self._dirty = False
+        self._batch_depth = 0
         if self.persistence_path and self.persistence_path.exists():
             self.load()
 
@@ -218,7 +237,7 @@ class SessionRegistry:
             session_id=session_id,
             created_at=timestamp,
             updated_at=timestamp,
-            stability="stable" if anchors else "weak",
+            stability="stable" if self._scoped_strong_anchors(descriptor) else "weak",
         )
         self._sessions[session_id] = record
         return record
@@ -300,10 +319,17 @@ class SessionRegistry:
                     record = self._sessions[self._merge_sessions({record.session_id, topology_record.session_id})]
 
             if event.kind == EventKind.MODE_TRANSITION and event.previous:
-                previous_matches = self._strong_matches(event.previous)
+                previous_candidates = set(self._strong_matches(event.previous))
                 previous_topology_id = self._topology_match(event.previous)
-                previous_id = next(iter(previous_matches), None) or previous_topology_id
-                if previous_id and previous_id in self._sessions:
+                if previous_topology_id:
+                    previous_candidates.add(previous_topology_id)
+                previous_candidates.intersection_update(self._sessions)
+                if previous_candidates:
+                    previous_id = (
+                        self._merge_sessions(previous_candidates)
+                        if len(previous_candidates) > 1
+                        else next(iter(previous_candidates))
+                    )
                     if record is not None and record.session_id != previous_id:
                         record = self._sessions[self._merge_sessions({record.session_id, previous_id})]
                     else:
@@ -378,8 +404,25 @@ class SessionRegistry:
                 for item in sorted(self._sessions.values(), key=lambda record: record.created_at)
             ]
 
+    @contextmanager
+    def batch(self):
+        """Defer persistence so one event boundary performs at most one registry write."""
+
+        with self._lock:
+            self._batch_depth += 1
+        try:
+            yield self
+        finally:
+            with self._lock:
+                self._batch_depth -= 1
+                if self._batch_depth < 0:
+                    self._batch_depth = 0
+                    raise RuntimeError("session persistence batch underflow")
+                if self._batch_depth == 0:
+                    self.flush()
+
     def save(self) -> None:
-        """Persist session state atomically."""
+        """Persist session state atomically and clear the dirty flag."""
 
         if not self.persistence_path:
             raise ValueError("persistence_path is not configured")
@@ -395,10 +438,21 @@ class SessionRegistry:
             temporary = self.persistence_path.with_suffix(self.persistence_path.suffix + ".tmp")
             temporary.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
             temporary.replace(self.persistence_path)
+            self._dirty = False
+
+    def flush(self) -> None:
+        """Persist pending changes once when persistence is configured."""
+
+        with self._lock:
+            if self.persistence_path and self._dirty:
+                self.save()
 
     def _save_if_configured(self) -> None:
-        if self.persistence_path:
-            self.save()
+        if not self.persistence_path:
+            return
+        self._dirty = True
+        if self._batch_depth == 0:
+            self.flush()
 
     def load(self) -> None:
         """Load and validate persisted session state."""
@@ -425,3 +479,4 @@ class SessionRegistry:
             dangling = set(self._anchor_to_session.values()) - set(self._sessions)
             if dangling:
                 raise ValueError(f"session registry contains dangling anchors: {sorted(dangling)}")
+            self._dirty = False
