@@ -9,6 +9,7 @@ from typing import Sequence
 from .engine import inspect_text, parse_external_claim
 from .knowledge import load_knowledge
 from .models import KnowledgeError, VERSION
+from .revive import RevivePlanError, build_revive_plan, vog_l29_c185_profile, write_revive_outputs
 from .runtime import doctor, report_text, run_selftest, scan_host
 
 
@@ -55,6 +56,14 @@ def _parser() -> argparse.ArgumentParser:
 
     knowledge_cmd = sub.add_parser("knowledge-verify", help="Validate the signed-pack-ready knowledge schema")
     knowledge_cmd.add_argument("--format", choices=("text", "json"), default="text")
+
+    revive_cmd = sub.add_parser("revive-plan", help="Build an audit-only reusable device revive plan")
+    revive_cmd.add_argument("profile", choices=("vog-l29-c185",), help="Revive profile to plan")
+    revive_cmd.add_argument("--package-root", required=True, help="Root of the matched firmware package")
+    revive_cmd.add_argument("--template-root", help="Optional P10Revive-style template/tooling root")
+    revive_cmd.add_argument("--format", choices=("text", "json"), default="text")
+    revive_cmd.add_argument("--output", help="Write plan JSON to this path")
+    revive_cmd.add_argument("--script-output", help="Write an audit-only batch scaffold to this path")
     return parser
 
 
@@ -129,7 +138,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 print(f"USB signatures: {result['usb_signatures']}")
                 print(f"Write authorized: {'YES' if result['write_authorized'] else 'NO'}")
             return 0 if result["valid"] else 2
-    except (OSError, ValueError, KnowledgeError) as exc:
+
+        if args.command == "revive-plan":
+            package_root = Path(args.package_root)
+            template_root = Path(args.template_root) if args.template_root else None
+            profile = vog_l29_c185_profile(package_root, template_root)
+            plan = build_revive_plan(profile)
+            write_revive_outputs(plan, Path(args.output) if args.output else None, Path(args.script_output) if args.script_output else None)
+            if args.format == "json":
+                print(json.dumps(plan, indent=2, sort_keys=True))
+            else:
+                target = plan["target"]
+                print(f"Xray revive plan: {plan['profile']}")
+                print(f"Target: {target['model']} {target['build']} {target['vendor']}/{target['country']}")
+                print(f"Artifacts: {len(plan['artifacts'])}")
+                print("Write authorized: NO")
+                print("Script mode: audit-only")
+            return 0
+    except (OSError, ValueError, KnowledgeError, RevivePlanError) as exc:
         print(f"xray: {exc}", file=sys.stderr)
         return 2
     return 2

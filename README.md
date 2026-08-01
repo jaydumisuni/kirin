@@ -111,6 +111,7 @@ xray selftest           Run UNISOC, Huawei and Apple proof cases
 xray inspect FILE       Inspect a captured tool/device log
 xray scan               Run available read-only host discovery providers
 xray knowledge-verify   Validate the local knowledge pack
+xray revive-plan        Build an audit-only reusable device revive plan
 
 xray-live doctor        Verify live providers and command availability
 xray-live providers     List provider manifests and capabilities
@@ -118,6 +119,25 @@ xray-live simulate      Run P30 Pro and Apple simulated live proof
 xray-live watch         Watch USB/PnP events and write evidence reports
 xray-live journal-verify Verify an evidence JSONL journal
 ```
+
+## Revive planning
+
+Xray can now map a known-safe revive pattern to a target device package without
+authorizing writes. The first profile uses the `P10Revive` layout as a template
+for a P30 Pro `VOG-L29 hw/meafnaf C185` plan while rejecting direct reuse of
+`VTR-*` payloads:
+
+```bash
+xray revive-plan vog-l29-c185 \
+  --package-root "D:\projects\Huawei kirin\VOGUE-L29D 10.0.0.186(C185E8R5P1)_Firmware_EMUI10.0.0_05016EUP" \
+  --template-root "D:\projects\Huawei kirin\P10Revive\P10 Revive" \
+  --output vog-l29-c185-revive-plan.json \
+  --script-output vog-l29-c185-revive-audit.bat
+```
+
+The generated batch file is audit-only and exits before any write. A separate
+repair authority still has to verify the VOG OEMINFO payload and the live
+`/dev/block/by-name/oeminfo` target before any device write is attempted.
 
 ## Repository map
 

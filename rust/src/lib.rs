@@ -43,6 +43,14 @@ pub struct Evaluation {
     pub identity_gate_failed: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ReviveWriteGate {
+    pub identity_verified: bool,
+    pub payload_verified: bool,
+    pub block_path_verified: bool,
+    pub operator_confirmed: bool,
+}
+
 /// Apply model-independent Xray certification policy.
 ///
 /// Mandatory proof and hard contradictions cap the result even when a score is
@@ -81,6 +89,15 @@ pub const fn write_authorized() -> bool {
 
 /// Models can add reasoning power, but the deterministic core does not require one.
 pub const fn model_required() -> bool {
+    false
+}
+
+/// Xray can prepare revive plans, but the evidence core cannot authorize writes.
+///
+/// The booleans are still modeled so future repair engines can prove every gate
+/// before handing off to a separate authority. This function intentionally
+/// returns false even when every gate is true.
+pub const fn revive_write_authorized(_gate: ReviveWriteGate) -> bool {
     false
 }
 
@@ -136,5 +153,15 @@ mod tests {
     fn authority_boundary_is_frozen() {
         assert!(!write_authorized());
         assert!(!model_required());
+    }
+
+    #[test]
+    fn revive_plans_do_not_authorize_writes() {
+        assert!(!revive_write_authorized(ReviveWriteGate {
+            identity_verified: true,
+            payload_verified: true,
+            block_path_verified: true,
+            operator_confirmed: true,
+        }));
     }
 }
