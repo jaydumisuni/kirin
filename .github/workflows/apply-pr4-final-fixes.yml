@@ -1,0 +1,221 @@
+name: Apply PR 4 final fixes
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/live-provider-session-core
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Apply final CodeRabbit corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected one match, found {count}")
+              return text.replace(old, new, 1)
+
+          live_path = Path("src/xray/live_review.py")
+          live = live_path.read_text(encoding="utf-8")
+          live = replace_once(
+              live,
+              "token in capability.value for token in FORBIDDEN_CAPABILITY_TOKENS",
+              "token in capability.value.casefold()\n                for token in FORBIDDEN_CAPABILITY_TOKENS",
+              "case-insensitive authority boundary",
+          )
+          live = replace_once(
+              live,
+              'if key == "transport.mode" and result.provider.startswith("apple-")',
+              'if key == "transport.mode"\n        and value\n        and result.provider.startswith("apple-")',
+              "Apple mode truthiness guard",
+          )
+          live, count = re.subn(
+              r"(def _run_wave\(\n    functions: Sequence\[Check\],\n    ctx: dict\[str, Any\],\n)(\) -> list\[LivePrivateResult\]:)",
+              r"\1    wave_number: int,\n\2",
+              live,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("explicit wave-number signature: expected one match")
+          live = replace_once(
+              live,
+              "            except Exception as exc:  # isolate one private from the rest of the corps\n                wave = 1 if function_index(name, WAVE_ONE) is not None else 2",
+              "            except Exception as exc:  # noqa: BLE001 - isolate one private from the corps",
+              "wave exception isolation",
+          )
+          live = replace_once(
+              live,
+              '                        f"failed:{name}",\n                        wave,',
+              '                        f"failed:{name}",\n                        wave_number,',
+              "explicit failed-result wave",
+          )
+          live, count = re.subn(
+              r"\n\ndef function_index\(.*?\n    return None\n\n\ndef review_live_event",
+              "\n\ndef review_live_event",
+              live,
+              count=1,
+              flags=re.DOTALL,
+          )
+          if count != 1:
+              raise SystemExit("obsolete wave inference helper: expected one match")
+          live = replace_once(
+              live,
+              "privates = tuple(_run_wave(WAVE_ONE, context) + _run_wave(WAVE_TWO, context))",
+              "privates = tuple(\n        _run_wave(WAVE_ONE, context, 1) + _run_wave(WAVE_TWO, context, 2)\n    )",
+              "explicit wave calls",
+          )
+          live_path.write_text(live, encoding="utf-8")
+
+          reviewer_path = Path("tools/review_live_core.py")
+          reviewer = reviewer_path.read_text(encoding="utf-8")
+          marker = '_SAFE_COMMAND = re.compile(r"^[A-Za-z0-9._+-]+$")\n'
+          shell_calls = '''_SAFE_COMMAND = re.compile(r"^[A-Za-z0-9._+-]+$")
+_SHELL_CALLS = {
+    ("os", "system"),
+    ("os", "popen"),
+    ("os", "spawnl"),
+    ("os", "spawnle"),
+    ("os", "spawnlp"),
+    ("os", "spawnlpe"),
+    ("os", "spawnv"),
+    ("os", "spawnve"),
+    ("os", "spawnvp"),
+    ("os", "spawnvpe"),
+    ("platform", "popen"),
+    ("subprocess", "getoutput"),
+    ("subprocess", "getstatusoutput"),
+}
+'''
+          reviewer = replace_once(
+              reviewer,
+              marker,
+              shell_calls,
+              "reviewer shell-call declarations",
+          )
+          reviewer = replace_once(
+              reviewer,
+              'if (node.func.value.id, node.func.attr) in {("os", "system"), ("os", "popen")}:',
+              "if (node.func.value.id, node.func.attr) in _SHELL_CALLS:",
+              "reviewer shell-call predicate",
+          )
+          reviewer = replace_once(
+              reviewer,
+              "    except Exception as exc:\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")",
+              "    except Exception as exc:  # noqa: BLE001 - a raising check must be auditable\n        return _result(check.__name__, False, f\"{type(exc).__name__}: {exc}\")",
+              "reviewer exception annotation",
+          )
+          reviewer_path.write_text(reviewer, encoding="utf-8")
+
+          docs_path = Path("docs/xray/live-provider-session-core.md")
+          docs = docs_path.read_text(encoding="utf-8")
+          docs = replace_once(
+              docs,
+              """The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
+provider observation has an ECID. Current libirecovery documents `-i/--ecid` as
+the specific-device selector and `-q/--query` as the read-only information query:
+https://github.com/libimobiledevice/libirecovery/blob/master/tools/irecovery.c
+""",
+              """The Apple providers use `irecovery -i ECID -q` whenever the watcher or a prior
+provider observation has an ECID. The minimum compatible CLI contract is
+libirecovery 1.0.0: its official tagged source exposes `-i/--ecid` as the
+specific-device selector and `-q/--query` as the read-only information query:
+https://github.com/libimobiledevice/libirecovery/blob/1.0.0/tools/irecovery.c
+
+Binary presence alone does not prove compatibility. Deployment verification must
+confirm `irecovery -V` reports 1.0.0 or newer, or that `irecovery --help` exposes
+both required options before the Apple provider is treated as ready.
+""",
+              "documented libirecovery contract",
+          )
+          docs_path.write_text(docs, encoding="utf-8")
+
+          tests_path = Path("tests/test_live_core.py")
+          tests = tests_path.read_text(encoding="utf-8")
+          additions = '''
+
+
+def test_apple_pid_mode_ignores_empty_transport_observation():
+    from xray.live_models import ProviderProbeResult
+    from xray.live_review import _apple_pid_mode
+
+    event = apple_events()[0]
+    result = _apple_pid_mode(
+        {
+            "event": event,
+            "providers": (
+                ProviderProbeResult(
+                    "apple-recovery",
+                    True,
+                    observations={"transport.mode": ""},
+                ),
+            ),
+        }
+    )
+    assert result.passed
+
+
+def test_write_boundary_casefolds_forbidden_capabilities():
+    from types import SimpleNamespace
+
+    from xray.live_review import _write_boundary
+
+    result = _write_boundary(
+        {
+            "manifests": (
+                SimpleNamespace(
+                    name="mixed-case",
+                    capabilities=(SimpleNamespace(value="FlashDevice"),),
+                ),
+            )
+        }
+    )
+    assert not result.passed
+
+
+def test_run_wave_uses_explicit_wave_number_for_failures():
+    from xray.live_review import _run_wave
+
+    def broken(_context):
+        raise RuntimeError("expected reviewer failure")
+
+    result = _run_wave((broken,), {}, 2)
+    assert len(result) == 1
+    assert result[0].wave == 2
+    assert not result[0].passed
+'''
+          if "def test_run_wave_uses_explicit_wave_number_for_failures():" not in tests:
+              tests_path.write_text(tests.rstrip() + additions + "\n", encoding="utf-8")
+          PY
+      - name: Prove corrections before commit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[test]"
+          python -m compileall -q src tests tools
+          pytest
+          python tools/review_live_core.py
+          xray-live simulate all --format json
+      - name: Commit and push corrected branch
+        run: |
+          rm -f .github/workflows/apply-final-coderabbit-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Address final CodeRabbit review"
+          git push origin HEAD:feature/live-provider-session-core
