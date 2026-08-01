@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+from fnmatch import fnmatchcase
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
+
+from .huawei_board import inspect_huawei_board_package
 
 
 MODEL_SCHEMA = "xray-firmware-model-v1"
@@ -27,20 +30,29 @@ def p30_pro_model_document() -> dict[str, Any]:
             {
                 "id": "vog-l29-three-part-dload",
                 "name": "VOG-L29 three-part dload",
-                "marker": "Software/dload/update_sd_base.zip",
+                "kind": "file-pattern",
+                "marker": "update_sd_base.zip",
                 "package_patterns": [
-                    "Software/dload/update_sd_base.zip",
-                    "Software/dload/update_sd_cust_VOG-L29_*.zip",
-                    "Software/dload/update_sd_preload_VOG-L29_*.zip",
+                    "update_sd_base.zip",
+                    "update_sd_cust_VOG-L29_*.zip",
+                    "update_sd_preload_VOG-L29_*.zip",
                 ],
                 "verification_patterns": [
-                    "Software/dload/update_sd_base/SOFTWARE_VER_LIST.mbn",
-                    "Software/dload/update_sd_cust_VOG-L29_*/SOFTWARE_VER_LIST.mbn",
-                    "Software/dload/update_sd_cust_VOG-L29_*/PTABLE_CUST.mbn",
-                    "Software/dload/update_sd_preload_VOG-L29_*/SOFTWARE_VER_LIST.mbn",
-                    "Software/dload/update_sd_preload_VOG-L29_*/PTABLE_PRELOAD.mbn",
+                    "update_sd_base/SOFTWARE_VER_LIST.mbn",
+                    "update_sd_cust_VOG-L29_*/SOFTWARE_VER_LIST.mbn",
+                    "update_sd_cust_VOG-L29_*/PTABLE_CUST.mbn",
+                    "update_sd_preload_VOG-L29_*/SOFTWARE_VER_LIST.mbn",
+                    "update_sd_preload_VOG-L29_*/PTABLE_PRELOAD.mbn",
                 ],
-            }
+            },
+            {
+                "id": "vog-kirin980-board-xml",
+                "name": "VOG Kirin 980 board software",
+                "kind": "huawei-board-xml",
+                "marker": "*_Download.xml",
+                "package_patterns": [],
+                "verification_patterns": [],
+            },
         ],
     }
 
@@ -162,12 +174,19 @@ def _scan_model(model_root: Path) -> dict[str, Any]:
             "profiles": [],
         }
 
-    packages: list[dict[str, Any]] = []
+    packages_by_root: dict[str, dict[str, Any]] = {}
     recognized_roots: set[str] = set()
     for profile in definition["profiles"]:
-        for package_root in _find_package_roots(model_root, profile["marker"]):
-            packages.append(_scan_profile_package(package_root, profile))
-            recognized_roots.add(str(package_root).casefold())
+        for data_root in _find_package_roots(model_root, profile["marker"]):
+            package_root = _display_package_root(model_root, data_root)
+            package = _scan_profile_package(data_root, profile, package_root)
+            key = str(package_root).casefold()
+            current = packages_by_root.get(key)
+            if current is None or _status_priority(package["status"]) > _status_priority(current["status"]):
+                packages_by_root[key] = package
+            recognized_roots.add(key)
+
+    packages = list(packages_by_root.values())
 
     for item in sorted(model_root.iterdir(), key=lambda candidate: candidate.name.casefold()):
         if item.name == "model.json" or str(item).casefold() in recognized_roots:
@@ -219,7 +238,7 @@ def _load_model_definition(path: Path) -> dict[str, Any]:
         if key not in data:
             raise FirmwareLibraryError(f"Missing {key!r} in {path}")
     for profile in data["profiles"]:
-        for key in ("id", "name", "marker", "package_patterns", "verification_patterns"):
+        for key in ("id", "name", "kind", "marker", "package_patterns", "verification_patterns"):
             if key not in profile:
                 raise FirmwareLibraryError(f"Missing profile {key!r} in {path}")
     return data
@@ -235,8 +254,9 @@ def _find_package_roots(model_root: Path, marker: str) -> list[Path]:
         marker_parts = marker_path.parts
         if len(relative_parts) < len(marker_parts):
             continue
-        if tuple(part.casefold() for part in relative_parts[-len(marker_parts) :]) != tuple(
-            part.casefold() for part in marker_parts
+        if not all(
+            fnmatchcase(actual.casefold(), expected.casefold())
+            for actual, expected in zip(relative_parts[-len(marker_parts) :], marker_parts)
         ):
             continue
         package_root = candidate
@@ -246,9 +266,32 @@ def _find_package_roots(model_root: Path, marker: str) -> list[Path]:
     return sorted(roots.values(), key=lambda path: str(path).casefold())
 
 
-def _scan_profile_package(package_root: Path, profile: dict[str, Any]) -> dict[str, Any]:
-    package_matches, package_missing = _match_patterns(package_root, profile["package_patterns"])
-    verification_matches, verification_missing = _match_patterns(package_root, profile["verification_patterns"])
+def _scan_profile_package(data_root: Path, profile: dict[str, Any], package_root: Path) -> dict[str, Any]:
+    if profile["kind"] == "huawei-board-xml":
+        board = inspect_huawei_board_package(data_root)
+        artifacts = [item["path"] for item in board["inventory"]]
+        return {
+            "name": package_root.name,
+            "path": str(package_root),
+            "data_root": str(data_root),
+            "profile": profile["id"],
+            "profile_name": profile["name"],
+            "status": board["status"],
+            "size": sum(item["size"] or 0 for item in board["inventory"]),
+            "artifacts": artifacts,
+            "missing": board["missing_artifacts"],
+            "metadata": {
+                "platform": board["platform"],
+                "product": board["product"],
+                "version": board["version"],
+                "operations": board["operation_count"],
+                "optional_inventory_missing": len(board["optional_inventory_missing"]),
+            },
+        }
+    if profile["kind"] != "file-pattern":
+        raise FirmwareLibraryError(f"Unknown firmware profile kind: {profile['kind']}")
+    package_matches, package_missing = _match_patterns(data_root, profile["package_patterns"])
+    verification_matches, verification_missing = _match_patterns(data_root, profile["verification_patterns"])
     if package_missing:
         status = "INCOMPLETE"
     elif verification_missing:
@@ -260,6 +303,7 @@ def _scan_profile_package(package_root: Path, profile: dict[str, Any]) -> dict[s
     return {
         "name": package_root.name,
         "path": str(package_root),
+        "data_root": str(data_root),
         "profile": profile["id"],
         "profile_name": profile["name"],
         "status": status,
@@ -267,6 +311,15 @@ def _scan_profile_package(package_root: Path, profile: dict[str, Any]) -> dict[s
         "artifacts": artifacts,
         "missing": package_missing + verification_missing,
     }
+
+
+def _display_package_root(model_root: Path, data_root: Path) -> Path:
+    relative = data_root.relative_to(model_root)
+    return model_root / relative.parts[0] if relative.parts else model_root
+
+
+def _status_priority(status: str) -> int:
+    return {"READY": 4, "NEEDS_EXTRACTION": 3, "INCOMPLETE": 2, "UNVERIFIED": 1}.get(status, 0)
 
 
 def _match_patterns(root: Path, patterns: Iterable[str]) -> tuple[list[Path], list[str]]:

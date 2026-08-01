@@ -15,6 +15,7 @@ from .firmware import (
     write_firmware_catalog,
 )
 from .knowledge import load_knowledge
+from .huawei_board import HuaweiBoardError, build_p30_revive_workflow, write_p30_revive_workflow
 from .models import KnowledgeError, VERSION
 from .revive import RevivePlanError, build_revive_plan, vog_l29_c185_profile, write_revive_outputs
 from .runtime import doctor, report_text, run_selftest, scan_host
@@ -84,6 +85,12 @@ def _parser() -> argparse.ArgumentParser:
     firmware_add_cmd.add_argument("--name", help="Display name for a generic model")
     firmware_add_cmd.add_argument("--manufacturer", default="Unknown", help="Manufacturer for a generic model")
     firmware_add_cmd.add_argument("--variant", action="append", default=[], help="Supported model code; repeat as needed")
+
+    workflow_cmd = sub.add_parser("revive-workflow", help="Build a carried model-specific revive workflow")
+    workflow_cmd.add_argument("profile", choices=("p30-pro",), help="Workflow profile to prepare")
+    workflow_cmd.add_argument("--model-root", required=True, help="Model folder containing board and target firmware")
+    workflow_cmd.add_argument("--format", choices=("text", "json"), default="text")
+    workflow_cmd.add_argument("--output", help="Write workflow JSON to this path")
     return parser
 
 
@@ -199,7 +206,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(f"Added firmware model: {definition}")
             return 0
-    except (OSError, ValueError, KnowledgeError, RevivePlanError, FirmwareLibraryError) as exc:
+
+        if args.command == "revive-workflow":
+            workflow = build_p30_revive_workflow(Path(args.model_root))
+            if args.output:
+                write_p30_revive_workflow(workflow, Path(args.output))
+            if args.format == "json":
+                print(json.dumps(workflow, indent=2, sort_keys=True))
+            else:
+                board_stage, target_stage, identity_stage = workflow["stages"][:3]
+                print(f"Revive workflow: {workflow['profile']}")
+                print(f"Board restore: {board_stage['status']} ({board_stage['operation_count']} operations)")
+                print(f"Target package: {target_stage['status']}")
+                print(f"Target identity: {identity_stage['status']}")
+                print("Write authorized: NO")
+            return 0
+    except (OSError, ValueError, KnowledgeError, RevivePlanError, FirmwareLibraryError, HuaweiBoardError) as exc:
         print(f"xray: {exc}", file=sys.stderr)
         return 2
     return 2

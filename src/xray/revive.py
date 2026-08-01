@@ -47,7 +47,8 @@ class ReviveProfile:
 
     @property
     def dload_root(self) -> Path:
-        return self.package_root / "Software" / "dload"
+        nested = self.package_root / "Software" / "dload"
+        return nested if nested.is_dir() else self.package_root
 
     def artifact_map(self) -> tuple[ReviveArtifact, ...]:
         return (

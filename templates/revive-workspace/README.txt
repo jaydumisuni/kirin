@@ -1,6 +1,7 @@
 HUAWEI REVIVE FIRMWARE LIBRARY
 
-Open "Huawei Revive.bat" to list firmware or add a model.
+Open "Huawei Revive.bat" to list firmware, add a model, or build the P30 Pro
+workflow from the official board XML and matched regional package.
 
 Firmware layout:
 
@@ -19,3 +20,4 @@ model are UNVERIFIED until that model receives a package signature.
 
 READY means the expected files are present. It does not authorize flashing.
 The P10Revive folder is a reference only and is never used as P30 Pro firmware.
+The carried P30 workflow is saved to plans\p30-pro-workflow.json.

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from xray.cli import main
 from xray.firmware import add_firmware_model, scan_firmware_library
+from xray.huawei_board import build_p30_revive_workflow, inspect_huawei_board_package
 from xray.revive import build_revive_plan, guarded_batch_script, vog_l29_c185_profile
 
 
@@ -24,6 +25,33 @@ def _vog_package(root: Path) -> Path:
     _write(dload / "update_sd_cust_VOG-L29_hw_meafnaf" / "PTABLE_CUST.mbn", b"cust-ptable")
     _write(dload / "update_sd_preload_VOG-L29_hw_meafnaf_R5" / "SOFTWARE_VER_LIST.mbn", b"preload-verlist")
     _write(dload / "update_sd_preload_VOG-L29_hw_meafnaf_R5" / "PTABLE_PRELOAD.mbn", b"preload-ptable")
+    return package
+
+
+def _board_package(root: Path) -> Path:
+    package = root / "VOGUE-AL00A-BD_board-software"
+    _write(package / "fastbootimage" / "ptable.img", b"ptable")
+    _write(package / "fastbootimage" / "oeminfo.mbn", b"oeminfo")
+    _write(package / "fastbootimage" / "version.img", b"version")
+    xml = """<?xml version="1.0"?>
+<configurations>
+  <configuration ap_platform="kirin980" product_id="VOG" version="VOG-AL00-BD 1.0.0.82">
+    <fastbootimage>
+      <image name="PTABLE" identifier="ptable">fastbootimage/ptable.img</image>
+      <image name="OEMINFO" identifier="oeminfo">fastbootimage/oeminfo.mbn</image>
+      <image name="VERSION" identifier="version">fastbootimage/version.img</image>
+    </fastbootimage>
+    <partially_erase_configuration>
+      <cmd type="fastboot" command="flash" identifier="ptable">fastbootimage/ptable.img</cmd>
+      <cmd type="fastboot" command="erase" identifier="userdata"></cmd>
+      <cmd type="fastboot" command="reboot"></cmd>
+    </partially_erase_configuration>
+  </configuration>
+</configurations>
+"""
+    path = package / "VOG-AL00-BD_1.0.0.82_Download.xml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(xml, encoding="utf-8")
     return package
 
 
@@ -132,3 +160,72 @@ def test_cli_firmware_list_refreshes_catalog(tmp_path: Path, capsys):
     assert main(["firmware-list", "--library-root", str(library), "--catalog-output", str(output)]) == 0
     assert "P30 Pro [READY]" in capsys.readouterr().out
     assert json.loads(output.read_text(encoding="utf-8"))["package_count"] == 1
+
+
+def test_huawei_board_xml_becomes_a_verified_recipe(tmp_path: Path):
+    package = _board_package(tmp_path)
+
+    recipe = inspect_huawei_board_package(package)
+
+    assert recipe["status"] == "READY"
+    assert recipe["platform"] == "kirin980"
+    assert recipe["product"] == "VOG"
+    assert recipe["inventory_count"] == 3
+    assert recipe["operation_count"] == 3
+    assert recipe["flash_count"] == 1
+    assert recipe["erase_count"] == 1
+    assert recipe["optional_inventory_missing"] == []
+    assert recipe["write_authorized"] is False
+
+
+def test_p30_catalog_recognizes_board_and_target_packages(tmp_path: Path):
+    library = tmp_path / "firmware"
+    add_firmware_model(library, "p 30 pro", preset="p30-pro")
+    model_root = library / "p 30 pro"
+    _vog_package(model_root)
+    _board_package(model_root)
+
+    catalog = scan_firmware_library(library)
+
+    packages = {item["profile"]: item for item in catalog["models"][0]["packages"]}
+    assert packages["vog-l29-three-part-dload"]["status"] == "READY"
+    assert packages["vog-kirin980-board-xml"]["status"] == "READY"
+    assert packages["vog-kirin980-board-xml"]["metadata"]["operations"] == 3
+
+
+def test_p10_stage_pattern_is_carried_into_p30_workflow(tmp_path: Path):
+    model_root = tmp_path / "p 30 pro"
+    _vog_package(model_root)
+    _board_package(model_root)
+
+    workflow = build_p30_revive_workflow(model_root)
+
+    assert workflow["schema"] == "xray-revive-workflow-v1"
+    assert workflow["stages"][0]["status"] == "PREPARED"
+    assert workflow["stages"][0]["operation_count"] == 3
+    assert workflow["stages"][1]["status"] == "PREPARED"
+    assert workflow["stages"][2]["status"] == "BLOCKED"
+    assert workflow["authority"]["write_authorized"] is False
+
+
+def test_cli_writes_carried_p30_workflow(tmp_path: Path, capsys):
+    model_root = tmp_path / "p 30 pro"
+    _vog_package(model_root)
+    _board_package(model_root)
+    output = tmp_path / "plans" / "p30-workflow.json"
+
+    assert (
+        main(
+            [
+                "revive-workflow",
+                "p30-pro",
+                "--model-root",
+                str(model_root),
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    assert "Board restore: PREPARED" in capsys.readouterr().out
+    assert json.loads(output.read_text(encoding="utf-8"))["ready_for_execution"] is False

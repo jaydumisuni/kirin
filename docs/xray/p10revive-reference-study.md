@@ -83,3 +83,12 @@ The first universal layer is the model-based firmware catalog:
 
 P30 Pro uses a VOG-L29 three-part dload signature. Its future repair recipe
 remains blocked until the VOG OEMINFO payload and live OEMINFO target are proven.
+
+The carried P30 implementation now reads the official
+`VOG-AL00-BD_1.0.0.82_Download.xml` with a structured XML parser. The local
+package declares 96 Fastboot images and a 103-operation partially-erase recipe;
+all operation-referenced image files are present. One optional DDR-test loader
+listed outside that recipe is absent and remains a catalog warning. This
+official Kirin 980 map replaces the P10 batch partition map. It is joined to the
+matched VOG-L29 C185 dload stage in `xray-revive-workflow-v1`, while target
+identity remains an explicit blocker.

@@ -59,6 +59,20 @@ pub enum FirmwarePackageStatus {
     Unverified,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReviveStageStatus {
+    Prepared,
+    Blocked,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ReviveStageGate {
+    pub device_verified: bool,
+    pub artifact_set_complete: bool,
+    pub partition_map_from_profile: bool,
+    pub prior_stage_verified: bool,
+}
+
 /// Apply model-independent Xray certification policy.
 ///
 /// Mandatory proof and hard contradictions cap the result even when a score is
@@ -123,6 +137,20 @@ pub const fn classify_firmware_package(
         FirmwarePackageStatus::NeedsExtraction
     } else {
         FirmwarePackageStatus::Ready
+    }
+}
+
+/// Prepare a recipe stage only when its deterministic evidence gates are complete.
+/// This does not grant write authority.
+pub const fn classify_revive_stage(gate: ReviveStageGate) -> ReviveStageStatus {
+    if gate.device_verified
+        && gate.artifact_set_complete
+        && gate.partition_map_from_profile
+        && gate.prior_stage_verified
+    {
+        ReviveStageStatus::Prepared
+    } else {
+        ReviveStageStatus::Blocked
     }
 }
 
@@ -208,5 +236,33 @@ mod tests {
             classify_firmware_package(false, true, true),
             FirmwarePackageStatus::Unverified
         );
+    }
+
+    #[test]
+    fn carried_recipe_requires_every_stage_gate() {
+        assert_eq!(
+            classify_revive_stage(ReviveStageGate {
+                device_verified: true,
+                artifact_set_complete: true,
+                partition_map_from_profile: true,
+                prior_stage_verified: true,
+            }),
+            ReviveStageStatus::Prepared
+        );
+        assert_eq!(
+            classify_revive_stage(ReviveStageGate {
+                device_verified: true,
+                artifact_set_complete: true,
+                partition_map_from_profile: false,
+                prior_stage_verified: true,
+            }),
+            ReviveStageStatus::Blocked
+        );
+        assert!(!revive_write_authorized(ReviveWriteGate {
+            identity_verified: true,
+            payload_verified: true,
+            block_path_verified: true,
+            operator_confirmed: true,
+        }));
     }
 }

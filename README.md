@@ -114,6 +114,7 @@ xray knowledge-verify   Validate the local knowledge pack
 xray revive-plan        Build an audit-only reusable device revive plan
 xray firmware-list      Refresh the model-based local firmware catalog
 xray firmware-add-model Add a model folder to the firmware library
+xray revive-workflow    Carry a proven staged workflow into a model profile
 
 xray-live doctor        Verify live providers and command availability
 xray-live providers     List provider manifests and capabilities
@@ -154,6 +155,8 @@ xray firmware-add-model --library-root firmware --folder "p 30 pro" --preset p30
 xray firmware-list --library-root firmware --catalog-output firmware/available-firmware.json
 xray firmware-add-model --library-root firmware --folder "mate 20 pro" \
   --name "Mate 20 Pro" --manufacturer Huawei --variant LYA-L29
+xray revive-workflow p30-pro --model-root "firmware/p 30 pro" \
+  --output plans/p30-pro-workflow.json
 ```
 
 ## Repository map
