@@ -7,6 +7,13 @@ from pathlib import Path
 from typing import Sequence
 
 from .engine import inspect_text, parse_external_claim
+from .firmware import (
+    FirmwareLibraryError,
+    add_firmware_model,
+    firmware_catalog_text,
+    scan_firmware_library,
+    write_firmware_catalog,
+)
 from .knowledge import load_knowledge
 from .models import KnowledgeError, VERSION
 from .revive import RevivePlanError, build_revive_plan, vog_l29_c185_profile, write_revive_outputs
@@ -64,6 +71,19 @@ def _parser() -> argparse.ArgumentParser:
     revive_cmd.add_argument("--format", choices=("text", "json"), default="text")
     revive_cmd.add_argument("--output", help="Write plan JSON to this path")
     revive_cmd.add_argument("--script-output", help="Write an audit-only batch scaffold to this path")
+
+    firmware_list_cmd = sub.add_parser("firmware-list", help="Scan a model-based firmware library")
+    firmware_list_cmd.add_argument("--library-root", required=True, help="Firmware library containing model folders")
+    firmware_list_cmd.add_argument("--format", choices=("text", "json"), default="text")
+    firmware_list_cmd.add_argument("--catalog-output", help="Write the refreshed catalog JSON to this path")
+
+    firmware_add_cmd = sub.add_parser("firmware-add-model", help="Add a model folder to a firmware library")
+    firmware_add_cmd.add_argument("--library-root", required=True, help="Firmware library root")
+    firmware_add_cmd.add_argument("--folder", required=True, help="Folder name for the model")
+    firmware_add_cmd.add_argument("--preset", choices=("generic", "p30-pro"), default="generic")
+    firmware_add_cmd.add_argument("--name", help="Display name for a generic model")
+    firmware_add_cmd.add_argument("--manufacturer", default="Unknown", help="Manufacturer for a generic model")
+    firmware_add_cmd.add_argument("--variant", action="append", default=[], help="Supported model code; repeat as needed")
     return parser
 
 
@@ -155,7 +175,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 print("Write authorized: NO")
                 print("Script mode: audit-only")
             return 0
-    except (OSError, ValueError, KnowledgeError, RevivePlanError) as exc:
+
+        if args.command == "firmware-list":
+            catalog = scan_firmware_library(Path(args.library_root))
+            if args.catalog_output:
+                write_firmware_catalog(catalog, Path(args.catalog_output))
+            payload = (
+                json.dumps(catalog, indent=2, sort_keys=True)
+                if args.format == "json"
+                else firmware_catalog_text(catalog)
+            )
+            print(payload)
+            return 0
+
+        if args.command == "firmware-add-model":
+            definition = add_firmware_model(
+                Path(args.library_root),
+                args.folder,
+                name=args.name,
+                manufacturer=args.manufacturer,
+                variants=args.variant,
+                preset=args.preset,
+            )
+            print(f"Added firmware model: {definition}")
+            return 0
+    except (OSError, ValueError, KnowledgeError, RevivePlanError, FirmwareLibraryError) as exc:
         print(f"xray: {exc}", file=sys.stderr)
         return 2
     return 2

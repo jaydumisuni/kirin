@@ -51,6 +51,14 @@ pub struct ReviveWriteGate {
     pub operator_confirmed: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FirmwarePackageStatus {
+    Ready,
+    NeedsExtraction,
+    Incomplete,
+    Unverified,
+}
+
 /// Apply model-independent Xray certification policy.
 ///
 /// Mandatory proof and hard contradictions cap the result even when a score is
@@ -99,6 +107,23 @@ pub const fn model_required() -> bool {
 /// returns false even when every gate is true.
 pub const fn revive_write_authorized(_gate: ReviveWriteGate) -> bool {
     false
+}
+
+/// Classify catalog evidence without turning package presence into flash authority.
+pub const fn classify_firmware_package(
+    signature_known: bool,
+    package_complete: bool,
+    verification_metadata_complete: bool,
+) -> FirmwarePackageStatus {
+    if !signature_known {
+        FirmwarePackageStatus::Unverified
+    } else if !package_complete {
+        FirmwarePackageStatus::Incomplete
+    } else if !verification_metadata_complete {
+        FirmwarePackageStatus::NeedsExtraction
+    } else {
+        FirmwarePackageStatus::Ready
+    }
 }
 
 #[cfg(test)]
@@ -163,5 +188,25 @@ mod tests {
             block_path_verified: true,
             operator_confirmed: true,
         }));
+    }
+
+    #[test]
+    fn firmware_catalog_requires_package_and_metadata() {
+        assert_eq!(
+            classify_firmware_package(true, true, true),
+            FirmwarePackageStatus::Ready
+        );
+        assert_eq!(
+            classify_firmware_package(true, true, false),
+            FirmwarePackageStatus::NeedsExtraction
+        );
+        assert_eq!(
+            classify_firmware_package(true, false, false),
+            FirmwarePackageStatus::Incomplete
+        );
+        assert_eq!(
+            classify_firmware_package(false, true, true),
+            FirmwarePackageStatus::Unverified
+        );
     }
 }

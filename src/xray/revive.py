@@ -20,13 +20,16 @@ class ReviveArtifact:
     role: str
 
     def to_dict(self) -> dict[str, Any]:
-        data = self.path.read_bytes()
+        digest = hashlib.sha256()
+        with self.path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+                digest.update(chunk)
         return {
             "label": self.label,
             "path": str(self.path),
             "role": self.role,
-            "size": len(data),
-            "sha256": hashlib.sha256(data).hexdigest().upper(),
+            "size": self.path.stat().st_size,
+            "sha256": digest.hexdigest().upper(),
         }
 
 

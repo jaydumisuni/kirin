@@ -112,6 +112,8 @@ xray inspect FILE       Inspect a captured tool/device log
 xray scan               Run available read-only host discovery providers
 xray knowledge-verify   Validate the local knowledge pack
 xray revive-plan        Build an audit-only reusable device revive plan
+xray firmware-list      Refresh the model-based local firmware catalog
+xray firmware-add-model Add a model folder to the firmware library
 
 xray-live doctor        Verify live providers and command availability
 xray-live providers     List provider manifests and capabilities
@@ -139,6 +141,21 @@ The generated batch file is audit-only and exits before any write. A separate
 repair authority still has to verify the VOG OEMINFO payload and the live
 `/dev/block/by-name/oeminfo` target before any device write is attempted.
 
+## Firmware library
+
+Firmware is organized by model so a later UI can consume the same JSON catalog.
+Each immediate folder below the library is one model. Dropped packages appear on
+the next scan; known package signatures are classified as `READY`,
+`NEEDS_EXTRACTION`, or `INCOMPLETE`, while new generic models remain
+`UNVERIFIED` until a package profile is added.
+
+```bash
+xray firmware-add-model --library-root firmware --folder "p 30 pro" --preset p30-pro
+xray firmware-list --library-root firmware --catalog-output firmware/available-firmware.json
+xray firmware-add-model --library-root firmware --folder "mate 20 pro" \
+  --name "Mate 20 Pro" --manufacturer Huawei --variant LYA-L29
+```
+
 ## Repository map
 
 - `src/xray/` — Python evidence, corps, live session/provider and CLI runtimes
@@ -148,6 +165,7 @@ repair authority still has to verify the VOG OEMINFO payload and the live
 - `tests/` — regression, simulation and proof tests
 - `tools/review_live_core.py` — independent local SRG 20-for-2 reviewer
 - `docs/xray/` — Huawei evidence, handoffs and frozen milestone records
+- `templates/revive-workspace/` — local firmware-library launchers
 
 Firmware binaries are not stored in this repository. Evidence is referenced by
 local path, package name, file size and hash where useful.

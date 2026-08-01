@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from xray.cli import main
+from xray.firmware import add_firmware_model, scan_firmware_library
 from xray.revive import build_revive_plan, guarded_batch_script, vog_l29_c185_profile
 
 
@@ -73,3 +74,61 @@ def test_cli_revive_plan_writes_outputs(tmp_path: Path, capsys):
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["profile"] == "vog-l29-c185-from-p10revive-pattern"
     assert "AUDIT ONLY" in script.read_text(encoding="utf-8")
+
+
+def test_firmware_library_lists_ready_p30_package(tmp_path: Path):
+    library = tmp_path / "firmware"
+    add_firmware_model(library, "p 30 pro", preset="p30-pro")
+    package = _vog_package(library / "p 30 pro")
+
+    catalog = scan_firmware_library(library)
+
+    assert catalog["model_count"] == 1
+    assert catalog["package_count"] == 1
+    model = catalog["models"][0]
+    assert model["name"] == "P30 Pro"
+    assert model["status"] == "READY"
+    assert model["packages"][0]["path"] == str(package)
+    assert model["packages"][0]["status"] == "READY"
+
+
+def test_firmware_library_marks_unextracted_metadata(tmp_path: Path):
+    library = tmp_path / "firmware"
+    add_firmware_model(library, "p30", preset="p30-pro")
+    package = _vog_package(library / "p30")
+    for path in package.rglob("*.mbn"):
+        path.unlink()
+
+    catalog = scan_firmware_library(library)
+
+    assert catalog["models"][0]["status"] == "NEEDS_EXTRACTION"
+    assert catalog["models"][0]["packages"][0]["missing"]
+
+
+def test_generic_new_model_lists_dropped_firmware_as_unverified(tmp_path: Path):
+    library = tmp_path / "firmware"
+    add_firmware_model(
+        library,
+        "mate 20 pro",
+        name="Mate 20 Pro",
+        manufacturer="Huawei",
+        variants=["LYA-L29"],
+    )
+    _write(library / "mate 20 pro" / "downloaded-firmware.zip", b"archive")
+
+    catalog = scan_firmware_library(library)
+
+    model = catalog["models"][0]
+    assert model["status"] == "UNVERIFIED"
+    assert model["packages"][0]["name"] == "downloaded-firmware.zip"
+
+
+def test_cli_firmware_list_refreshes_catalog(tmp_path: Path, capsys):
+    library = tmp_path / "firmware"
+    add_firmware_model(library, "p 30 pro", preset="p30-pro")
+    _vog_package(library / "p 30 pro")
+    output = library / "available-firmware.json"
+
+    assert main(["firmware-list", "--library-root", str(library), "--catalog-output", str(output)]) == 0
+    assert "P30 Pro [READY]" in capsys.readouterr().out
+    assert json.loads(output.read_text(encoding="utf-8"))["package_count"] == 1
