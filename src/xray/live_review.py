@@ -174,7 +174,8 @@ def _write_boundary(ctx: dict[str, Any]) -> LivePrivateResult:
     for manifest in ctx["manifests"]:
         for capability in manifest.capabilities:
             if any(
-                token in capability.value for token in FORBIDDEN_CAPABILITY_TOKENS
+                token in capability.value.casefold()
+                for token in FORBIDDEN_CAPABILITY_TOKENS
             ):
                 forbidden.append(f"{manifest.name}:{capability.value}")
     return _private(
@@ -428,7 +429,9 @@ def _apple_pid_mode(ctx: dict[str, Any]) -> LivePrivateResult:
         str(value).upper()
         for result in ctx["providers"]
         for key, value in result.observations.items()
-        if key == "transport.mode" and result.provider.startswith("apple-")
+        if key == "transport.mode"
+        and value
+        and result.provider.startswith("apple-")
     }
     bad = bool(expected and reported and expected not in reported)
     return _private(
@@ -769,6 +772,7 @@ WAVE_TWO: tuple[Check, ...] = (
 def _run_wave(
     functions: Sequence[Check],
     ctx: dict[str, Any],
+    wave_number: int,
 ) -> list[LivePrivateResult]:
     results: list[LivePrivateResult] = []
     with ThreadPoolExecutor(
@@ -780,27 +784,17 @@ def _run_wave(
             name = futures[future]
             try:
                 results.append(future.result())
-            except Exception as exc:  # isolate one private from the rest of the corps
-                wave = 1 if function_index(name, WAVE_ONE) is not None else 2
+            except Exception as exc:  # noqa: BLE001 - isolate one private from the corps
                 results.append(
                     _private(
                         f"failed:{name}",
-                        wave,
+                        wave_number,
                         name,
                         False,
                         (str(exc),),
                     )
                 )
     return sorted(results, key=lambda item: (item.wave, item.private_id))
-
-
-def function_index(name: str, functions: Sequence[Check]) -> int | None:
-    """Return the position of a named private check, if present."""
-
-    for index, function in enumerate(functions):
-        if function.__name__ == name:
-            return index
-    return None
 
 
 def review_live_event(
@@ -822,7 +816,9 @@ def review_live_event(
         "providers": tuple(providers),
         "envelopes": envelopes,
     }
-    privates = tuple(_run_wave(WAVE_ONE, context) + _run_wave(WAVE_TWO, context))
+    privates = tuple(
+        _run_wave(WAVE_ONE, context, 1) + _run_wave(WAVE_TWO, context, 2)
+    )
     critical = [
         item for item in privates if not item.passed and item.severity == "critical"
     ]
