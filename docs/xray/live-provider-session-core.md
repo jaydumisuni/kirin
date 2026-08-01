@@ -8,7 +8,7 @@ Session Registry correlates one physical device across modes
 Provider Registry selects declared read-only capabilities
 Providers capture raw command/device evidence
 Quartermaster journal preserves timestamps, topology and hashes
-SRG 10-for-2 live corps challenges every report
+SRG 20-for-2 live corps challenges every report
 Governor publishes LIVE_READ_ONLY_READY, CONFLICTED or BLOCKED
 Hunter/model remains optional and cannot authorize writes
 ```
@@ -49,7 +49,21 @@ Each provider result records:
 - normalized observations
 - declared sensitive fields
 
-The JSONL journal checks envelope self-consistency during append and replay and detects accidental corruption or records that no longer match their embedded hashes. These hashes are stored beside the data, so they are not an attacker-resistant trust anchor. A later secured deployment must anchor a journal head with an OS-keystore-backed HMAC/signature or an external signed ledger before claiming adversarial tamper detection.
+The JSONL journal checks envelope self-consistency during append and replay and
+detects accidental corruption or records that no longer match their embedded
+hashes. These hashes are stored beside the data, so they are not an
+attacker-resistant trust anchor. A later secured deployment must anchor a journal
+head with an OS-keystore-backed HMAC/signature or an external signed ledger before
+claiming adversarial tamper detection.
+
+## SRG 20-for-2 review
+
+Each live event is challenged by two governed waves of twenty deterministic
+private checks. Wave one covers event, provider, manifest, schema, capability and
+command-contract integrity. Wave two covers session continuity, topology,
+provider evidence custody, protocol selectors, Apple ambiguity and the read-only
+identity gate. The forty private IDs are fixed as `private-001` through
+`private-040`; the permanent officers and Governor receive the complete result.
 
 ## Simulation proof
 
@@ -69,8 +83,9 @@ CPID, BDID, ECID, product type and mode through Apple provider envelopes.
 ## Local proof commands
 
 ```bash
-python -m compileall -q src tests
+python -m compileall -q src tests tools
 pytest
+python tools/review_live_core.py
 python -m xray.live_cli doctor --format json
 python -m xray.live_cli providers --format json
 python -m xray.live_cli simulate all --format json
@@ -91,7 +106,6 @@ but the Governor marks that report `CONFLICTED` because multiple simultaneous
 Recovery/DFU devices would otherwise be ambiguous. The observed ECID is hashed
 into the Session Registry and can merge a newly enumerated endpoint back into
 its older physical-device session.
-
 
 ## Sensitive-data retention and access control
 
