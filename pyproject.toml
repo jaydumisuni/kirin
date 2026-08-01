@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ttg-xray"
-version = "0.1.0"
-description = "Model-independent device evidence and verification core"
+version = "0.2.0"
+description = "Model-independent device evidence, verification, session, and provider core"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{name = "THETECHGUY DIGITAL SOLUTIONS"}]
@@ -16,6 +16,7 @@ test = ["pytest>=7.0"]
 
 [project.scripts]
 xray = "xray.__main__:main"
+xray-live = "xray.live_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
