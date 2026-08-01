@@ -147,7 +147,7 @@ def build_revive_plan(profile: ReviveProfile) -> dict[str, Any]:
         {
             "phase": "oeminfo_identity_repair",
             "purpose": "Create or apply a VOG-L29 hw/meafnaf OEMINFO payload using the P10Revive dd pattern, not the P10 payload.",
-            "required_payload": "VOG-L29 C185 hw/meafnaf OEMINFO binary, not present in the current local evidence set",
+            "required_payload": "A verified 96 MiB VOG-L29C185.bin generated from the P30 board template and exact target metadata",
             "block_path_rule": "Resolve /dev/block/by-name/oeminfo on the connected phone; do not assume /dev/block/sdd5.",
             "target_identity": {
                 "model": profile.target_model,
@@ -237,7 +237,7 @@ def guarded_batch_script(plan: dict[str, Any]) -> str:
             f"echo   PRELOAD_VERLIST={artifacts['PRELOAD_VERLIST']}",
             f"echo   PRELOAD_PTABLE={artifacts['PRELOAD_PTABLE']}",
             "echo.",
-            "echo Missing before execution: VOG-L29 C185 OEMINFO payload and verified /dev/block/by-name/oeminfo path.",
+            "echo Required before execution: verified VOG-L29C185.bin and a live /dev/block/by-name/oeminfo path.",
             "echo Do not use VTR-L29C432.bin or /dev/block/sdd5 by assumption.",
             "exit /b 2",
             "",

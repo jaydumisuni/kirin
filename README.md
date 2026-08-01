@@ -115,6 +115,12 @@ xray revive-plan        Build an audit-only reusable device revive plan
 xray firmware-list      Refresh the model-based local firmware catalog
 xray firmware-add-model Add a model folder to the firmware library
 xray revive-workflow    Carry a proven staged workflow into a model profile
+xray update-app-list    List Huawei UPDATE.APP payloads without extracting
+xray update-app-extract Extract one named payload with checksum verification
+xray huawei-usb-boot    Load signed images through Huawei USB COM mode
+xray huawei-recovery-build Build a target-based temporary recovery image
+xray huawei-oeminfo-build Build a verified VOG-L29 C185 OEMINFO image
+xray huawei-package-verify Fully verify the matched VOG-L29 C185 package
 
 xray-live doctor        Verify live providers and command availability
 xray-live providers     List provider manifests and capabilities
@@ -138,9 +144,37 @@ xray revive-plan vog-l29-c185 \
   --script-output vog-l29-c185-revive-audit.bat
 ```
 
-The generated batch file is audit-only and exits before any write. A separate
-repair authority still has to verify the VOG OEMINFO payload and the live
-`/dev/block/by-name/oeminfo` target before any device write is attempted.
+The generated batch file is audit-only and exits before any write. The P30
+workflow can build and verify `VOG-L29C185.bin` from the 96 MiB board template
+and exact base, CUST and PRELOAD metadata. A live
+`/dev/block/by-name/oeminfo` target and full post-write hash are still mandatory
+before the target firmware stage.
+
+```bash
+xray huawei-oeminfo-build \
+  --template "firmware/p 30 pro/BOARD_PACKAGE/fastbootimage/oeminfo.mbn" \
+  --base-version "TARGET_PACKAGE/revive-extracted/metadata/BASE_VER.mbn" \
+  --cust-version "TARGET_PACKAGE/revive-extracted/metadata/CUST_VER.mbn" \
+  --preload-version "TARGET_PACKAGE/revive-extracted/metadata/PRELOAD_VER.mbn" \
+  --output "firmware/p 30 pro/VOG-L29C185.bin" \
+  --manifest "firmware/p 30 pro/VOG-L29C185.bin.manifest.json"
+```
+
+This corrects the old `verlist.img` assumption. The P10 reference launchers
+continue after missing verlist-related files; their effective identity repair
+is the model-specific OEMINFO write. P30 therefore receives a generated v8
+OEMINFO image and never a copied P10 payload.
+
+The USB loader command is an explicit recovery transport for Huawei devices
+already enumerated in USB COM mode. It requires signed, model-matched loader
+images and an address for every image; Xray does not infer addresses or firmware:
+
+```bash
+xray huawei-usb-boot --port COM117 \
+  --image "0x00022000=sec_usb_xloader.img" \
+  --image "0x60049000=sec_usb_xloader2.img" \
+  --image "0x1A400000=sec_fastboot.img"
+```
 
 ## Firmware library
 
@@ -158,6 +192,11 @@ xray firmware-add-model --library-root firmware --folder "mate 20 pro" \
 xray revive-workflow p30-pro --model-root "firmware/p 30 pro" \
   --output plans/p30-pro-workflow.json
 ```
+
+The P30 workflow verifies all 63 internal UPDATE.APP entries, keeps the board
+service Fastboot stage through the OEMINFO repair, withholds the board recipe's
+final normal reboot, and restores target Fastboot only during the matched target
+firmware stage. It remains audit-only until the live device gates are satisfied.
 
 ## Repository map
 

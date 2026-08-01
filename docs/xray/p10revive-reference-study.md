@@ -81,8 +81,11 @@ The first universal layer is the model-based firmware catalog:
   model-specific signature is supplied.
 - catalog state does not authorize a device write.
 
-P30 Pro uses a VOG-L29 three-part dload signature. Its future repair recipe
-remains blocked until the VOG OEMINFO payload and live OEMINFO target are proven.
+P30 Pro uses a VOG-L29 three-part dload signature. Its offline identity payload
+is now generated from the 96 MiB v8 board template plus exact VOG-L29 C185 base,
+CUST and PRELOAD metadata. The generator writes only the translated identity
+and version records in both 48 MiB copies while preserving board records 4501,
+4502 and 4503 byte-for-byte.
 
 The carried P30 implementation now reads the official
 `VOG-AL00-BD_1.0.0.82_Download.xml` with a structured XML parser. The local
@@ -91,4 +94,7 @@ all operation-referenced image files are present. One optional DDR-test loader
 listed outside that recipe is absent and remains a catalog warning. This
 official Kirin 980 map replaces the P10 batch partition map. It is joined to the
 matched VOG-L29 C185 dload stage in `xray-revive-workflow-v1`, while target
-identity remains an explicit blocker.
+identity image is an offline prepared stage. Live execution remains blocked
+until the device's OEMINFO by-name path and size are resolved, the full write is
+hashed back, and the matched target-firmware stage is ready to complete without
+a normal reboot in between.

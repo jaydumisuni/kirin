@@ -13,6 +13,7 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
+huawei-usb = ["pyserial>=3.5"]
 
 [project.scripts]
 xray = "xray.__main__:main"
