@@ -9,6 +9,8 @@ from xray.cli import main
 from xray.oeminfo import (
     OEMINFO_HEADER,
     OEMINFO_MAGIC,
+    OEMINFO_AREA_NONE_WP,
+    OEMINFO_AREA_ROOT_WP,
     OEMINFO_PAGE_SIZE,
     OEMINFO_PARTITION_SIZE,
     OEMINFO_REGION_SIZE,
@@ -18,6 +20,7 @@ from xray.oeminfo import (
     VOG_L29_C185_CUST_VERSION,
     VOG_L29_C185_PRELOAD_VERSION,
     oeminfo_v8_layout,
+    oeminfo_v8_protection_area,
     read_oeminfo_record,
     verify_vog_l29_c185_oeminfo,
     vog_l29_c185_record_specs,
@@ -70,6 +73,11 @@ def test_v8_record_layout_matches_huawei_subpartitions():
         oeminfo_v8_layout(900)
 
 
+def test_v8_record_protection_area_distinguishes_vendor_from_versions():
+    assert oeminfo_v8_protection_area(27) == OEMINFO_AREA_NONE_WP
+    assert oeminfo_v8_protection_area(1502) == OEMINFO_AREA_ROOT_WP
+
+
 def test_cli_builds_redundant_vog_l29_c185_image_and_preserves_board_records(
     tmp_path: Path,
     capsys,
@@ -114,6 +122,8 @@ def test_cli_builds_redundant_vog_l29_c185_image_and_preserves_board_records(
     report = verify_vog_l29_c185_oeminfo(output, template)
     saved = json.loads(manifest.read_text(encoding="utf-8"))
     assert report["status"] == "VERIFIED"
+    vendor = next(item for item in report["identity_records"] if item["name"] == "vendor_country")
+    assert vendor["protection_area"] == OEMINFO_AREA_ROOT_WP
     assert saved["output"]["sha256"] == report["image_sha256"]
     assert [item["slot_sha256"] for item in saved["preserved_board_records"]] == [
         item["slot_sha256"] for item in report["preserved_board_records"]

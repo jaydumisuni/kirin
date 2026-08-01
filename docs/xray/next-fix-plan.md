@@ -2,6 +2,32 @@
 
 Date: 2026-07-30
 
+## Live update: 2026-08-02
+
+The temporary Kirin 980 service Fastboot session established the following:
+
+- The exact `CUST_VERLIST` payload passed its UPDATE.APP checksum, but
+  `fastboot flash cust_verlist` was rejected with `partition length get error`.
+  VOG does not expose this package-control record as a GPT partition.
+- The matched CUST `VERSION` image and PRELOAD `PRELOAD` image both wrote with
+  `OKAY`. The system, base, custom, and preload OEMINFO version records all read
+  back as the expected C185 values.
+- The exact target recovery trio and target Fastboot image were restored after
+  the service work. Every send and write returned `OKAY`.
+- `vendorcountry` still fails. Its v8 record is ID 1502 in the root-write-
+  protected OEMINFO area. A whole-partition Fastboot write updated the none-WP
+  version records but did not make this root-WP record readable.
+- `fastboot oem unlock` with the service token returned `OKAY`, rebooted, and
+  factory-reset the phone, but the stock bootloader returned with both FB and
+  USER lock states still locked. This is not a persistent-unlock method here.
+
+The next temporary service session must set the NVME `FBLOCK` byte to `1`, then
+prove the setting survives a bootloader reload. Once persistent factory Fastboot
+access is verified, use the target-based root recovery path to read the live
+96 MiB OEMINFO, patch only the root-WP vendor record while preserving all other
+device data, write it back, and require `vendorcountry: hw/meafnaf` before a
+normal boot. Do not relock during repair.
+
 ## Confidence level
 
 We have enough information to avoid blind file hunting. We do not yet have enough

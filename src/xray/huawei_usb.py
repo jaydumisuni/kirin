@@ -10,6 +10,8 @@ from typing import Callable, Protocol, Sequence
 ACK = b"\xaa"
 BAUD_RATE = 115200
 MAX_CHUNK_SIZE = 0x400
+START_FRAME = bytes.fromhex("FE00FF0100000004000002011D0F")
+START_FRAME_DELAY_SECONDS = 0.05
 
 
 def _build_crc_table() -> tuple[int, ...]:
@@ -138,6 +140,15 @@ class HuaweiUsbLoader:
         self._serial = serial_port
         self._progress = progress
 
+    def _send_start_frame(self) -> None:
+        written = self._serial.write(START_FRAME)
+        if written != len(START_FRAME):
+            raise HuaweiUsbError(
+                f"Short write during loader start handshake: wrote {written} of {len(START_FRAME)} bytes"
+            )
+        self._serial.flush()
+        time.sleep(START_FRAME_DELAY_SECONDS)
+
     def _send_frame(self, payload: bytes, *, description: str) -> None:
         frame = frame_with_crc(payload)
         written = self._serial.write(frame)
@@ -185,6 +196,7 @@ class HuaweiUsbLoader:
     def send_images(self, images: Sequence[UsbLoaderImage]) -> list[dict[str, int | str]]:
         if not images:
             raise HuaweiUsbError("At least one loader image is required")
+        self._send_start_frame()
         return [self.send_image(image) for image in images]
 
 

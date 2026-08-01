@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from xray.huawei_usb import (
+    START_FRAME,
     HuaweiUsbError,
     HuaweiUsbLoader,
     UsbLoaderImage,
@@ -19,15 +20,18 @@ from xray.huawei_usb import (
 
 
 class FakeSerial:
-    def __init__(self, acknowledgements: bytes):
+    def __init__(self, acknowledgements: bytes, *, short_write_at: int | None = None):
         self.acknowledgements = bytearray(acknowledgements)
         self.writes: list[bytes] = []
+        self.short_write_at = short_write_at
         self.closed = False
         self.dtr = False
         self.rts = False
 
     def write(self, data: bytes) -> int:
         self.writes.append(data)
+        if self.short_write_at == len(self.writes) - 1:
+            return len(data) - 1
         return len(data)
 
     def read(self, size: int = 1) -> bytes:
@@ -94,9 +98,20 @@ def test_load_huawei_bootloader_configures_and_closes_port(tmp_path: Path):
 
     assert options["port"] == "COM117"
     assert options["baudrate"] == 115200
+    assert serial.writes[0] == START_FRAME
     assert serial.dtr is True
     assert serial.rts is True
     assert serial.closed is True
+
+
+def test_loader_stops_on_short_start_handshake(tmp_path: Path):
+    path = tmp_path / "loader.img"
+    path.write_bytes(b"loader")
+
+    with pytest.raises(HuaweiUsbError, match="Short write during loader start handshake"):
+        HuaweiUsbLoader(FakeSerial(b"", short_write_at=0)).send_images(
+            [UsbLoaderImage(path, 0x22000)]
+        )
 
 
 def test_parse_image_spec_requires_explicit_address(tmp_path: Path):

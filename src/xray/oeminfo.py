@@ -17,6 +17,11 @@ OEMINFO_PARTITION_SIZE = 2 * OEMINFO_REGION_SIZE
 OEMINFO_SUBPART_SIZE = 8 * 1024 * 1024
 OEMINFO_HEADER = struct.Struct("<8sIIIII")
 
+OEMINFO_AREA_NONE_WP = "none-wp"
+OEMINFO_AREA_ROOT_WP = "root-wp"
+OEMINFO_AREA_POWER_UP_WP = "power-up-wp"
+OEMINFO_AREA_REUSED = "reused"
+
 VOG_L29_C185_MODEL = "VOG-L29"
 VOG_L29_C185_VENDOR_COUNTRY = "hw/meafnaf"
 VOG_L29_C185_SYSTEM_VERSION = "VOG-L29 10.0.0.186(C185E8R5P1)"
@@ -63,6 +68,25 @@ def oeminfo_v8_layout(record_id: int) -> tuple[int, int]:
     if 1001 <= remainder <= 1200:
         return subpart_offset + 0x280000 + (remainder - 1001) * 8192, 8192
     raise OeminfoError(f"OEMINFO v8 record ID has no defined slot: {record_id}")
+
+
+def oeminfo_v8_protection_area(record_id: int) -> str:
+    """Return the write-protection area containing a v8 record."""
+
+    if 4501 <= record_id <= 4503:
+        return OEMINFO_AREA_REUSED
+    quotient, _ = divmod(record_id, 1500)
+    areas = {
+        0: OEMINFO_AREA_NONE_WP,
+        1: OEMINFO_AREA_ROOT_WP,
+        2: OEMINFO_AREA_POWER_UP_WP,
+    }
+    try:
+        area = areas[quotient]
+    except KeyError as exc:
+        raise OeminfoError(f"OEMINFO v8 record ID has no protection area: {record_id}") from exc
+    oeminfo_v8_layout(record_id)
+    return area
 
 
 def vog_l29_c185_record_specs(
@@ -240,6 +264,7 @@ def _verify_profile_records(
                 "name": spec.name,
                 "legacy_id": spec.legacy_id,
                 "record_id": spec.record_id,
+                "protection_area": oeminfo_v8_protection_area(spec.record_id),
                 "payload_ascii": spec.payload.decode("ascii"),
                 "payload_sha256": _sha256_bytes(spec.payload),
                 "copies": copies,
